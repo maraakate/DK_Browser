@@ -50,10 +50,6 @@ do { \
 _TCHAR		q2Path[MAX_PATH];
 _TCHAR		q2Exe[MAX_PATH];
 _TCHAR		*q2Buddies;
-_TCHAR		*modFilters = NULL;
-_TCHAR		*modNames[64];
-_TCHAR		lastUsedMod[64];
-int			numModNames;
 int			q2PacketsPerSecond;
 
 DWORD		q2GoodPing, q2MediumPing;
@@ -208,16 +204,6 @@ void SaveStuff(void)
 	HKEY			hk;
 	WINDOWPLACEMENT	winPlacement;
 	int				temp;
-	_TCHAR			*lastMod;
-
-	temp = SendDlgItemMessage (hwndMain, IDC_MOD, CB_GETCURSEL, 0, 0);
-	if (temp != -1)
-	{
-		temp = SendDlgItemMessage (hwndMain, IDC_MOD, CB_GETITEMDATA, temp, 0);
-		lastMod = modNames[temp];
-	}
-	else
-		lastMod = _T("");
 	
 	RegCreateKeyEx  (HKEY_CURRENT_USER, _T("SOFTWARE\\r1ch.net\\") APP_NAME, 0, NULL, 0, KEY_WRITE, NULL, &hk, &result);
 	if (!(RegOpenKeyEx (HKEY_CURRENT_USER, _T("SOFTWARE\\r1ch.net\\") APP_NAME, 0, KEY_WRITE, &hk)))
@@ -225,17 +211,10 @@ void SaveStuff(void)
 		RegSetValueEx (hk, GAME_NAME _T(" Directory"), 0, REG_SZ, (const BYTE *)q2Path, (_tcslen(q2Path)+1) * sizeof(_TCHAR));
 		RegSetValueEx (hk, GAME_NAME _T(" Executable"), 0, REG_SZ, (const BYTE *)q2Exe, (_tcslen(q2Exe)+1) * sizeof(_TCHAR));
 
-		RegSetValueEx (hk, _T("Last Used Mod Filter"), 0, REG_SZ, (const BYTE *)lastMod, (_tcslen(lastMod)+1) * sizeof(_TCHAR));
-
 		if (q2Buddies[0])
 			RegSetValueEx (hk, _T("Buddy List"), 0, REG_SZ, (const BYTE *)q2Buddies, (_tcslen(q2Buddies)+1) * sizeof(_TCHAR));
 		else
 			RegSetValueEx (hk, _T("Buddy List"), 0, REG_SZ, (const BYTE *)_T(""), 1 * sizeof(_TCHAR));
-
-		if (modFilters[0])
-			RegSetValueEx (hk, _T("Mod Filters"), 0, REG_SZ, (const BYTE *)modFilters, (_tcslen(modFilters)+1) * sizeof(_TCHAR));
-		else
-			RegSetValueEx (hk, _T("Mod Filters"), 0, REG_SZ, (const BYTE *)_T(""), 1 * sizeof(_TCHAR));
 
 		RegSetValueEx (hk, _T("Packets Per Second"), 0, REG_DWORD, (const BYTE *)&q2PacketsPerSecond, sizeof(DWORD));
 		RegSetValueEx (hk, _T("Player View Style"), 0, REG_DWORD, (const BYTE *)&listIsDetailed, sizeof(DWORD));
@@ -737,6 +716,7 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 	DWORD		now, msecs;
 	int			players;
 	int			i;
+	int len = 0;
 	char		*token, *seps, *p, *rLine;
 	LVITEM		lvI;
 	char		*serverInfo[INFO_MAX];
@@ -798,11 +778,6 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 	else
 		server->reservedSlots = 0;
 
-	if (serverInfo[INFO_ANTICHEAT])
-		server->anticheat = atoi(serverInfo[INFO_ANTICHEAT]);
-	else
-		server->anticheat = 0;
-
 	if (serverInfo[INFO_TIMELIMIT])
 		server->timelimit = atoi(serverInfo[INFO_TIMELIMIT]);
 	else
@@ -825,6 +800,15 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 #endif
 	else
 		StringCbCopy (server->szGameName, sizeof(server->szGameName), _T("default"));
+
+	if (serverInfo[INFO_GAMEMODE] && serverInfo[INFO_GAMEMODE][0])
+#ifdef _UNICODE
+		MultiByteToWideChar (CP_ACP, 0, serverInfo[INFO_GAMEMODE], -1, server->szGameMode, tsizeof(server->szGameMode)-1);
+#else
+		Q_strncpy (server->szGameMode, serverInfo[INFO_GAMEMODE], sizeof(server->szGameMode)-1);
+#endif
+	else
+		StringCbCopy (server->szGameMode, sizeof(server->szGameMode), _T("default"));
 
 	if (serverInfo[INFO_VERSION])
 #ifdef _UNICODE
@@ -882,6 +866,7 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 	if (serverInfo[INFO_GAMEDATE])
 	{
 		_TCHAR	*p;
+		_TCHAR *built = L"Built ";
 		int		sc = 0;
 
 #ifdef _UNICODE
@@ -890,21 +875,27 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 		Q_strncpy (server->szGameDate, serverInfo[INFO_GAMEDATE], sizeof(server->szGameDate)-1);
 #endif
 
-		p = server->szGameDate;
-
-		while (*p && *(p+1))
+		p = wcsstr(server->szGameDate, built);
+		if (p)
 		{
-			if (_istspace (*p) && !_istspace (*(p+1)))
-				sc++;
-
-			if (sc == 3)
+			StringCbCopy(server->szGameDate, sizeof(server->szGameDate), p + 6);
+			while (*p && *(p+1))
 			{
-				*p = 0;
-				break;
+				if (_istspace (*p) && !_istspace (*(p+1)))
+					sc++;
+
+				if (sc == 3)
+				{
+					*p = 0;
+					break;
+				}
+				p++;
 			}
-			p++;
 		}
 	}
+
+	len = wcslen(server->szGameDate)-1;
+	server->szGameDate[len] = L'\0';
 
 	free (rLine);
 
@@ -1230,119 +1221,6 @@ abortLoop:
 	timeEndPeriod (1);
 }
 
-DWORD GetQ2ServersList (BYTE *out, int *len, DWORD maxlen)
-{
-	_TCHAR		statusCode[8];
-	DWORD		statusCodeLen;
-	DWORD		dwSize = 0;
-	DWORD		dwDownloaded = 0;
-	BYTE		*pszOutBuffer;
-	BOOL		bResults = FALSE;
-	HINTERNET	hSession = NULL, hConnect = NULL, hRequest = NULL;
-	DWORD		retVal = 0;
-	DWORD		index;
-	DWORD		dwTotalSize;
-	WCHAR		resource[1024];
-
-	StatusBar (_T("Fetching q2servers.com server list..."));
-
-	EnterCriticalSection (&critModList);
-
-	index = SendDlgItemMessage (hwndMain, IDC_MOD, CB_GETCURSEL, 0, 0);
-	if (index != -1)
-		index = SendDlgItemMessage (hwndMain, IDC_MOD, CB_GETITEMDATA, index, 0);
-	else
-		index = 0;
-
-	StringCbPrintfW (resource, sizeof(resource), L"/?mod=%s&raw=2&inc=1", modNames[index]);
-
-	LeaveCriticalSection (&critModList);
-
-	// Use WinHttpOpen to obtain a session handle.
-	hSession = WinHttpOpen( L"QSB/1.0",  
-		WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
-		WINHTTP_NO_PROXY_NAME, 
-		WINHTTP_NO_PROXY_BYPASS, 0);
-
-	// Specify an HTTP server.
-	if (hSession)
-		hConnect = WinHttpConnect (hSession, L"q2servers.com", INTERNET_DEFAULT_HTTP_PORT, 0);
-
-	// Create an HTTP request handle.
-	if (hConnect)
-		hRequest = WinHttpOpenRequest (hConnect, L"GET", resource, NULL, WINHTTP_NO_REFERER, 
-		WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_REFRESH);
-
-	// Send a request.
-	if (hRequest)
-		bResults = WinHttpSendRequest (hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0);
-
-	// End the request.
-	if (bResults)
-		bResults = WinHttpReceiveResponse (hRequest, NULL);
-
-	statusCodeLen = sizeof(statusCode);
-	if (!WinHttpQueryHeaders (hRequest, WINHTTP_QUERY_STATUS_CODE, WINHTTP_HEADER_NAME_BY_INDEX, &statusCode, &statusCodeLen, WINHTTP_NO_HEADER_INDEX))
-		goto abortUpdate;
-
-	if (_ttoi(statusCode) != HTTP_STATUS_OK)
-		goto abortUpdate;
-
-	// Keep checking for data until there is nothing left.
-	if (bResults)
-	{
-		pszOutBuffer = out;
-		dwTotalSize = 0;
-
-		do 
-		{
-			// Check for available data.
-			dwSize = 0;
-			if (!WinHttpQueryDataAvailable (hRequest, &dwSize))
-				goto abortUpdate;
-
-			if (dwTotalSize + dwSize >= maxlen)
-				goto isGood;
-
-			if (!WinHttpReadData( hRequest, (LPVOID)pszOutBuffer, dwSize, &dwDownloaded))
-			{
-				goto abortUpdate;
-			}
-			else
-			{
-				if (!dwDownloaded)
-					dwSize = 0;
-
-				pszOutBuffer += dwDownloaded;
-				dwTotalSize += dwDownloaded;
-			}
-
-
-		} while (dwSize > 0);
-
-		goto isGood;
-	}
-
-abortUpdate:
-	StatusBar (_T("Failed to download server list from q2servers.com."));
-	retVal = 1;
-
-isGood:
-
-	// Close any open handles.
-	if (hRequest)
-		WinHttpCloseHandle(hRequest);
-
-	if (hConnect)
-		WinHttpCloseHandle(hConnect);
-
-	if (hSession)
-		WinHttpCloseHandle(hSession);
-
-	*len = dwTotalSize;
-
-	return retVal;
-}
 
 void GetServerList (void)
 {
@@ -1356,7 +1234,6 @@ void GetServerList (void)
 	char		queryBuff[256];
 	BOOL		gotEOF;
 
-#ifndef __QUAKE2__
 	StatusBar (_T("Resolving ") MASTER_SERVER _T("..."));
 
 #ifdef _UNICODE
@@ -1394,7 +1271,8 @@ void GetServerList (void)
 		StringCbCopyA (queryBuff, sizeof(queryBuff), "query");
 		result = strlen (queryBuff);
 #elif QUERY_STYLE == 2
-		result = sprintf (queryBuff, "\xFF\xFF\xFF\xFFgetservers 69");
+		result = sprintf (queryBuff, "\xFF\xFF\xFF\xFFgetservers daikatana");
+#if 0 /* FS: TODO: Implement. */
 		if (show_full)
 		{
 			result += 5;
@@ -1406,6 +1284,7 @@ void GetServerList (void)
 			result += 6;
 			strcat (queryBuff, " empty");
 		}
+#endif
 #endif
 		result = sendto (master, queryBuff, result, 0, (const struct sockaddr *)&dgFrom, sizeof (dgFrom));
 
@@ -1444,17 +1323,6 @@ void GetServerList (void)
 		EnableWindow (GetDlgItem (hwndMain, IDC_CONFIG), TRUE);
 		ExitThread (1);
 	}
-#else
-	if (GetQ2ServersList (recvBuff, &result, sizeof(recvBuff)))
-	{
-		scanInProgress = FALSE;
-		SetDlgItemText (hwndMain, IDC_UPDATE, _T("Update"));
-		EnableWindow (GetDlgItem (hwndMain, IDC_MOD), TRUE);
-		EnableWindow (GetDlgItem (hwndMain, IDC_CONFIG), TRUE);
-		ExitThread (1);
-	}
-
-#endif
 
 	numServers = 0;
 	total = 0;
@@ -1494,10 +1362,8 @@ reParse:
 
 		memcpy (&servers[numServers].port, p, sizeof (servers[numServers].port));
 		servers[numServers].port = ntohs(servers[numServers].port);
+		servers[numServers].port += 10; /* FS: Daikatana port is + 10 */
 		p += 2;
-
-		servers[numServers].cID = *p;
-		p++;
 
 		for (i = 0; i < numServers; i++)
 		{
@@ -1548,9 +1414,7 @@ reParse:
 	}
 #endif
 
-#ifndef __QUAKE2__
 	closesocket (master);
-#endif
 
 	//clear lists
 	SendMessage (hWndList, LVM_DELETEALLITEMS, 0, 0);
@@ -1575,12 +1439,8 @@ reParse:
 	ExitThread (0);
 
 socketError:
-#ifndef __QUAKE2__
 	closesocket (master);
 	StatusBar (_T("Error querying ") MASTER_SERVER _T("."));
-#else
-
-#endif
 
 	SetDlgItemText (hwndMain, IDC_UPDATE, _T("Update"));
 	EnableWindow (GetDlgItem (hwndMain, IDC_CONFIG), TRUE);
@@ -1852,273 +1712,6 @@ VOID ParseBuddyList (VOID)
 	HeapFree (GetProcessHeap(), 0, buddies);
 }
 
-VOID ProcessModFilters (VOID)
-{
-	int		i;
-	_TCHAR	lastString[512];
-	int		lastSelection;
-	int		newItemIndex;
-
-	EnterCriticalSection (&critModList);
-
-	i = SendDlgItemMessage (hwndMain, IDC_MOD, CB_GETCOUNT, 0, 0);
-	if (i)
-	{
-		lastSelection = SendDlgItemMessage (hwndMain, IDC_MOD, CB_GETCURSEL, 0, 0);
-		if (lastSelection != -1)
-		{
-			i = SendDlgItemMessage (hwndMain, IDC_MOD, CB_GETITEMDATA, lastSelection, 0);
-			StringCbCopy (lastString, sizeof(lastString), modNames[i]);
-		}
-	}
-	else
-		StringCbCopy (lastString, sizeof(lastString), lastUsedMod);
-
-	for (i = 0; i < numModNames; i++)
-		free (modNames[i]);
-
-	numModNames = 0;
-	newItemIndex = 0;
-
-	if (modFilters[0])
-	{
-		_TCHAR	*next_token;
-		_TCHAR	*m;
-		_TCHAR	*myModFilters;
-
-		modNames[numModNames] = _tcsdup (_T(""));
-		numModNames++;
-
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_RESETCONTENT, 0, 0);
-
-		i = SendDlgItemMessage (hwndMain, IDC_MOD, CB_ADDSTRING, 0, (LPARAM)_T("(No Filter)"));
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_SETITEMDATA, i, 0);
-		newItemIndex = i;
-
-		next_token = NULL;
-
-		myModFilters = _tcsdup (modFilters);
-
-		m = _tcstok_s (myModFilters, _T("\n"), &next_token);
-
-		while (m)
-		{
-			i = SendDlgItemMessage (hwndMain, IDC_MOD, CB_ADDSTRING, 0, (LPARAM)m);
-			m = _tcstok_s (NULL, _T("\n"), &next_token);
-			if (m)
-			{
-				if (!_tcscmp (m, lastString))
-					newItemIndex = i;
-				modNames[numModNames] = _tcsdup (m);
-				SendDlgItemMessage (hwndMain, IDC_MOD, CB_SETITEMDATA, i, numModNames);
-				numModNames++;
-			}
-			else
-			{
-				SendDlgItemMessage (hwndMain, IDC_MOD, CB_RESETCONTENT, 0, 0);
-				free (myModFilters);
-				goto brokenCombo;
-			}
-
-			m = _tcstok_s (NULL, _T("\n"), &next_token);
-		}
-
-		free (myModFilters);
-
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_SETCURSEL, newItemIndex, 0);
-	}
-	else
-	{
-brokenCombo:
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_RESETCONTENT, 0, 0);
-
-		for (i = 0; i < numModNames; i++)
-			free (modNames[i]);
-
-		numModNames = 0;
-
-		modNames[numModNames] = _tcsdup(_T(""));
-		i = SendDlgItemMessage (hwndMain, IDC_MOD, CB_ADDSTRING, 0, (LPARAM)_T("(No Filter)"));
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_SETITEMDATA, i, numModNames);
-		numModNames++;
-
-		modNames[numModNames] = _tcsdup(_T("action"));
-		i = SendDlgItemMessage (hwndMain, IDC_MOD, CB_ADDSTRING, 0, (LPARAM)_T("Action Quake II"));
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_SETITEMDATA, i, numModNames);
-		numModNames++;
-
-		modNames[numModNames] = _tcsdup(_T("ctf"));
-		i = SendDlgItemMessage (hwndMain, IDC_MOD, CB_ADDSTRING, 0, (LPARAM)_T("CTF"));
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_SETITEMDATA, i, numModNames);
-		numModNames++;
-
-		modNames[numModNames] = _tcsdup(_T("dday"));
-		i = SendDlgItemMessage (hwndMain, IDC_MOD, CB_ADDSTRING, 0, (LPARAM)_T("D-Day"));
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_SETITEMDATA, i, numModNames);
-		numModNames++;
-
-		modNames[numModNames] = _tcsdup(_T("ffa"));
-		i = SendDlgItemMessage (hwndMain, IDC_MOD, CB_ADDSTRING, 0, (LPARAM)_T("Deathmatch"));
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_SETITEMDATA, i, numModNames);
-		numModNames++;
-
-		modNames[numModNames] = _tcsdup(_T("gloom"));
-		i = SendDlgItemMessage (hwndMain, IDC_MOD, CB_ADDSTRING, 0, (LPARAM)_T("Gloom"));
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_SETITEMDATA, i, numModNames);
-		numModNames++;
-
-		modNames[numModNames] = _tcsdup(_T("kots"));
-		i = SendDlgItemMessage (hwndMain, IDC_MOD, CB_ADDSTRING, 0, (LPARAM)_T("KOTS"));
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_SETITEMDATA, i, numModNames);
-		numModNames++;
-
-		modNames[numModNames] = _tcsdup(_T("tdm"));
-		i = SendDlgItemMessage (hwndMain, IDC_MOD, CB_ADDSTRING, 0, (LPARAM)_T("TDM / Duel"));
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_SETITEMDATA, i, numModNames);
-		numModNames++;
-
-		modNames[numModNames] = _tcsdup(_T("vortex"));
-		i = SendDlgItemMessage (hwndMain, IDC_MOD, CB_ADDSTRING, 0, (LPARAM)_T("Vortex"));
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_SETITEMDATA, i, numModNames);
-		numModNames++;
-
-		modNames[numModNames] = _tcsdup(_T("jump"));
-		i = SendDlgItemMessage (hwndMain, IDC_MOD, CB_ADDSTRING, 0, (LPARAM)_T("Jump"));
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_SETITEMDATA, i, numModNames);
-		numModNames++;
-
-		modNames[numModNames] = _tcsdup(_T("lox"));
-		i = SendDlgItemMessage (hwndMain, IDC_MOD, CB_ADDSTRING, 0, (LPARAM)_T("LOX"));
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_SETITEMDATA, i, numModNames);
-		numModNames++;
-
-		modNames[numModNames] = _tcsdup(_T("arena"));
-		i = SendDlgItemMessage (hwndMain, IDC_MOD, CB_ADDSTRING, 0, (LPARAM)_T("Rocket Arena 2"));
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_SETITEMDATA, i, numModNames);
-		numModNames++;
-
-		modNames[numModNames] = _tcsdup(_T("wodx"));
-		i = SendDlgItemMessage (hwndMain, IDC_MOD, CB_ADDSTRING, 0, (LPARAM)_T("WODX"));
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_SETITEMDATA, i, numModNames);
-		numModNames++;
-
-		SendDlgItemMessage (hwndMain, IDC_MOD, CB_SETCURSEL, newItemIndex, 0);
-	}
-
-	LeaveCriticalSection (&critModList);
-}
-
-LONG WINAPI UpdateModFilters (VOID *arg)
-{
-	int			len;
-	CHAR		newModFilters[8192];
-	_TCHAR		statusCode[8];
-	DWORD		statusCodeLen;
-	DWORD		dwSize = 0;
-	DWORD		dwDownloaded = 0;
-	LPSTR		pszOutBuffer;
-	BOOL		bResults = FALSE;
-	HINTERNET	hSession = NULL, hConnect = NULL, hRequest = NULL;
-
-	// Use WinHttpOpen to obtain a session handle.
-	hSession = WinHttpOpen( L"QSB/1.0",  
-		WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
-		WINHTTP_NO_PROXY_NAME, 
-		WINHTTP_NO_PROXY_BYPASS, 0);
-
-	// Specify an HTTP server.
-	if (hSession)
-		hConnect = WinHttpConnect (hSession, L"q2servers.com", INTERNET_DEFAULT_HTTP_PORT, 0);
-
-	// Create an HTTP request handle.
-	if (hConnect)
-		hRequest = WinHttpOpenRequest (hConnect, L"GET", L"/filters", NULL, WINHTTP_NO_REFERER, 
-		WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_REFRESH);
-
-	// Send a request.
-	if (hRequest)
-		bResults = WinHttpSendRequest (hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0);
-
-	// End the request.
-	if (bResults)
-		bResults = WinHttpReceiveResponse (hRequest, NULL);
-
-	statusCodeLen = sizeof(statusCode);
-	if (!WinHttpQueryHeaders (hRequest, WINHTTP_QUERY_STATUS_CODE, WINHTTP_HEADER_NAME_BY_INDEX, &statusCode, &statusCodeLen, WINHTTP_NO_HEADER_INDEX))
-		goto abortUpdate;
-
-	if (_ttoi(statusCode) != HTTP_STATUS_OK)
-		goto abortUpdate;
-
-	// Keep checking for data until there is nothing left.
-	if (bResults)
-	{
-		newModFilters[0] = '\0';
-
-		do 
-		{
-			// Check for available data.
-			dwSize = 0;
-			if (!WinHttpQueryDataAvailable (hRequest, &dwSize))
-				goto abortUpdate;
-
-			// Allocate space for the buffer.
-			pszOutBuffer = malloc (dwSize + 1);
-			if (!pszOutBuffer)
-			{
-				goto abortUpdate;
-				dwSize=0;
-			}
-			else
-			{
-				// Read the Data.
-				ZeroMemory (pszOutBuffer, dwSize + 1);
-
-				if (!WinHttpReadData( hRequest, (LPVOID)pszOutBuffer, 
-					dwSize, &dwDownloaded))
-				{
-					free (pszOutBuffer);
-					goto abortUpdate;
-				}
-				else
-				{
-					if (!dwDownloaded)
-						dwSize = 0;
-
-					StringCbCatA (newModFilters, sizeof(newModFilters), pszOutBuffer);
-				}
-
-				// Free the memory allocated to the buffer.
-				free (pszOutBuffer);
-			}
-
-		} while (dwSize > 0);
-
-		if (modFilters)
-			HeapFree (GetProcessHeap(), 0, modFilters);
-
-		len = (strlen (newModFilters) + 1) * 2;
-		modFilters = HeapAlloc (GetProcessHeap(), 0, len);
-		MultiByteToWideChar (CP_UTF8, 0, newModFilters, -1, modFilters, len);
-
-		ProcessModFilters ();
-	}
-
-abortUpdate:
-
-	// Close any open handles.
-	if (hRequest)
-		WinHttpCloseHandle(hRequest);
-
-	if (hConnect)
-		WinHttpCloseHandle(hConnect);
-
-	if (hSession)
-		WinHttpCloseHandle(hSession);
-
-	return 0;
-}
-
 VOID InitMainDialog (HWND hWnd)
 {
 	DWORD			tid;
@@ -2217,9 +1810,6 @@ VOID InitMainDialog (HWND hWnd)
 		size = sizeof (q2Exe);
 		RegQueryValueEx(hk, GAME_NAME _T(" Executable"), 0, NULL, (LPBYTE)q2Exe, (LPDWORD)&size);
 
-		size = sizeof (lastUsedMod);
-		RegQueryValueEx(hk, _T("Last Used Mod Filter"), 0, NULL, (LPBYTE)lastUsedMod, (LPDWORD)&size);
-
 		size = sizeof (winPlacement);
 		if (RegQueryValueEx (hk, _T("Window Position"), 0, NULL, (LPBYTE)&winPlacement, (LPDWORD)&size) == ERROR_SUCCESS)
 		{
@@ -2236,24 +1826,13 @@ VOID InitMainDialog (HWND hWnd)
 		if (RegQueryValueEx (hk, _T("Buddy List"), 0, NULL, (LPBYTE)q2Buddies, (LPDWORD)&size) != ERROR_SUCCESS)
 			q2Buddies[0] = 0;
 
-		size = 0;
-		if (RegQueryValueEx (hk, _T("Mod Filters"), 0, NULL, NULL, (LPDWORD)&size) != ERROR_SUCCESS)
-			size = 1;
-
-		modFilters = HeapAlloc (GetProcessHeap(), 0, size);
-		if (RegQueryValueEx (hk, _T("Mod Filters"), 0, NULL, (LPBYTE)modFilters, (LPDWORD)&size) != ERROR_SUCCESS)
-			modFilters[0] = 0;
-
 		RegCloseKey(hk);
-
-		ProcessModFilters ();
 	}
 	else
 	{
 		show_full = show_empty = 1;
 		SendDlgItemMessage (hwndMain, IDC_INCLUDE_EMPTY, BM_SETCHECK, 1, 0);
 		SendDlgItemMessage (hwndMain, IDC_INCLUDE_FULL, BM_SETCHECK, 1, 0);
-		lastUsedMod[0] = '\0';
 	}
 
 	if (!q2Buddies)
@@ -2277,14 +1856,12 @@ VOID InitMainDialog (HWND hWnd)
 
 	if (!q2Path[0])
 	{
-#ifndef __QUAKE2__
 		if (!(RegOpenKeyEx(HKEY_LOCAL_MACHINE, GAME_REGPATH, 0, KEY_READ, &hk)))
 		{
 			size = sizeof (q2Path);
 			RegQueryValueEx(hk, GAME_REGKEY, 0, NULL, (LPBYTE)q2Path, (LPDWORD)&size);
 			RegCloseKey (hk);
 		}
-#endif
 	}
 		
 	if (!q2Exe[0])
@@ -2307,8 +1884,6 @@ VOID InitMainDialog (HWND hWnd)
 	ShowWindow (hwndMain, SW_SHOWNORMAL);
 	UpdateWindow (hwndMain);
 	UpdateServers ();
-
-	CreateThread (NULL, 0, UpdateModFilters, NULL, 0, &tid);
 }
 
 VOID ShowServerContextMenu (LPNMITEMACTIVATE ev)
@@ -2683,14 +2258,14 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 							FillRect (nmcd->hdc, &rc2, (HBRUSH)(COLOR_WINDOW+1));*/
 
 						ListView_GetSubItemRect (hWndList, iRow, 1, LVIR_ICON, &rc);
-						ImageList_DrawEx (hCountry, server->cID, nmcd->hdc, rc.left + 1, rc.top + 1, 18, 12, CLR_NONE, CLR_NONE, ILD_NORMAL);
+//						ImageList_DrawEx (hCountry, server->cID, nmcd->hdc, rc.left + 1, rc.top + 1, 18, 12, CLR_NONE, CLR_NONE, ILD_NORMAL);
 						pResult |= CDRF_SKIPDEFAULT;
 
 						tmp.S_un.S_addr = server->ip;
 						StringCchPrintf (szText, sizeof(szText), _T("%S:%d"), inet_ntoa (tmp), server->port);
 
 						ListView_GetSubItemRect (hWndList, iRow, 1, LVIR_BOUNDS, &rc2);
-						rc2.left += rc.right - rc.left + 8;
+						rc2.left += rc.right - rc.left - 12;
 
 						if (nmcd->uItemState & CDIS_FOCUS)
 							SetTextColor (nmcd->hdc, GetSysColor (COLOR_HIGHLIGHTTEXT));
@@ -2766,7 +2341,7 @@ VOID SortServerListView (NMLVDISPINFO *info)
 VOID FillServerListView (NMLVDISPINFO *info)
 {
 	IN_ADDR 			tmp;
-//	_TCHAR				buff[512];
+	// _TCHAR				buff[512];
 	int					index;
 	const column_t		*column;
 	const SERVERINFO	*server;
@@ -2792,11 +2367,12 @@ VOID FillServerListView (NMLVDISPINFO *info)
 			//info->item.mask |= LVIF_IMAGE;
 
 			//info->item.iImage = 7 + server->cID;
-
+#if 0
 			tmp.S_un.S_addr = server->ip;
-			//_stprintf (buff, _T("%S:%d"), inet_ntoa (tmp), servers->port);
-			//_tcscpy (info->item.pszText, buff);
-			//StringCchPrintf (info->item.pszText, info->item.cchTextMax, _T("     %S:%d"), inet_ntoa (tmp), server->port);
+			_stprintf (buff, _T("%S:%d"), inet_ntoa (tmp), servers->port);
+			_tcscpy (info->item.pszText, buff);
+			StringCchPrintf (info->item.pszText, info->item.cchTextMax, _T("%S:%d"), inet_ntoa (tmp), server->port);
+#endif
 			info->item.pszText[0] = '\0';
 			break;
 
@@ -2814,11 +2390,6 @@ VOID FillServerListView (NMLVDISPINFO *info)
 			StringCchCopy (info->item.pszText, info->item.cchTextMax, server->szGameDate);
 			break;
 
-		case INFO_ANTICHEAT:
-			StringCchPrintf (info->item.pszText, info->item.cchTextMax, _T("%d"), server->anticheat);
-			//_tcscpy (info->item.pszText, buff);
-			break;
-
 		case INFO_TIMELIMIT:
 			StringCchPrintf (info->item.pszText, info->item.cchTextMax, _T("%d"), server->timelimit);
 			//_tcscpy (info->item.pszText, buff);
@@ -2828,23 +2399,16 @@ VOID FillServerListView (NMLVDISPINFO *info)
 			StringCchCopy (info->item.pszText, info->item.cchTextMax, server->szGameName);
 			break;
 
+		case INFO_GAMEMODE:
+			StringCchCopy (info->item.pszText, info->item.cchTextMax, server->szGameMode);
+			break;
+
 		case INFO_VERSION:
 			StringCchCopy (info->item.pszText, info->item.cchTextMax, server->szVersion);
 			break;
 
-		case INFO_PING:
-			//info->item.mask |= LVIF_IMAGE;
-			/*if (server->ping <= q2GoodPing)
-				info->item.iImage = 1;
-			else if (server->ping <= q2MediumPing)
-				info->item.iImage = 2;
-			else
-				info->item.iImage = 3;*/
-
-			 
+		default:
 			info->item.pszText[0] = '\0';
-			//StringCchPrintf (info->item.pszText, info->item.cchTextMax, _T("     %d"), server->ping);
-			//_tcscpy (info->item.pszText, buff);
 			break;
 	}
 }

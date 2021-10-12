@@ -1,7 +1,7 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Q2_Browser", "Q2_Browser.vcproj", "{198C6B2A-4DB9-4459-B5AA-96335EB874CB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DK_Browser", "DK_Browser_VS2005.vcproj", "{198C6B2A-4DB9-4459-B5AA-96335EB874CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

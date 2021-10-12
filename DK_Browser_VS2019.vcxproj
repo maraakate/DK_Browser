@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>Q2_Browser</ProjectName>
+    <ProjectName>DK_Browser</ProjectName>
     <ProjectGuid>{198C6B2A-4DB9-4459-B5AA-96335EB874CB}</ProjectGuid>
     <RootNamespace>Q2_Browser</RootNamespace>
     <Keyword>Win32Proj</Keyword>

@@ -94,6 +94,7 @@
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <AdditionalDependencies>ws2_32.lib;Comctl32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -112,6 +113,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <AdditionalDependencies>ws2_32.lib;Comctl32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -126,6 +128,9 @@
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
     </ClCompile>
     <Link>
       <AdditionalDependencies>ws2_32.lib;Comctl32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -144,6 +149,9 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
     </ClCompile>
     <Link>
       <AdditionalDependencies>ws2_32.lib;Comctl32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -245,6 +253,11 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="gsb.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="gpl.txt" />
+    <Text Include="readme_dkb.txt" />
+    <Text Include="TODO_DKB.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

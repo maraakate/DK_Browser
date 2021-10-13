@@ -15,11 +15,13 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
+#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -80,15 +82,10 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_WIN32               ICON                    "windows.ico"
-
 IDI_LINUX               ICON                    "linux.ico"
-
 IDI_FREEBSD             ICON                    "freebsd.ico"
-
 IDI_MACOSX              ICON                    "macos.ico"
-
 IDI_Q2                  ICON                    "quake2.ico"
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -96,160 +93,82 @@ IDI_Q2                  ICON                    "quake2.ico"
 //
 
 IDB_BITMAP0             BITMAP                  "flags\\bmp\\n-a.bmp"
-
 IDB_BITMAP1             BITMAP                  "flags\\bmp\\ar.bmp"
-
 IDB_BITMAP2             BITMAP                  "flags\\bmp\\at.bmp"
-
 IDB_BITMAP3             BITMAP                  "flags\\bmp\\au.bmp"
-
 IDB_BITMAP4             BITMAP                  "flags\\bmp\\be.bmp"
-
 IDB_BITMAP5             BITMAP                  "flags\\bmp\\bg.bmp"
-
 IDB_BITMAP6             BITMAP                  "flags\\bmp\\bh.bmp"
-
 IDB_BITMAP7             BITMAP                  "flags\\bmp\\bo.bmp"
-
 IDB_BITMAP8             BITMAP                  "flags\\bmp\\br.bmp"
-
 IDB_BITMAP9             BITMAP                  "flags\\bmp\\bs.bmp"
-
 IDB_BITMAP10            BITMAP                  "flags\\bmp\\by.bmp"
-
 IDB_BITMAP11            BITMAP                  "flags\\bmp\\ca.bmp"
-
 IDB_BITMAP12            BITMAP                  "flags\\bmp\\ch.bmp"
-
 IDB_BITMAP13            BITMAP                  "flags\\bmp\\cl.bmp"
-
 IDB_BITMAP14            BITMAP                  "flags\\bmp\\cn.bmp"
-
 IDB_BITMAP15            BITMAP                  "flags\\bmp\\co.bmp"
-
 IDB_BITMAP16            BITMAP                  "flags\\bmp\\cs.bmp"
-
 IDB_BITMAP17            BITMAP                  "flags\\bmp\\cz.bmp"
-
 IDB_BITMAP18            BITMAP                  "flags\\bmp\\de.bmp"
-
 IDB_BITMAP19            BITMAP                  "flags\\bmp\\dk.bmp"
-
 IDB_BITMAP20            BITMAP                  "flags\\bmp\\do.bmp"
-
 IDB_BITMAP21            BITMAP                  "flags\\bmp\\ee.bmp"
-
 IDB_BITMAP22            BITMAP                  "flags\\bmp\\en.bmp"
-
 IDB_BITMAP23            BITMAP                  "flags\\bmp\\es.bmp"
-
 IDB_BITMAP24            BITMAP                  "flags\\bmp\\eu.bmp"
-
 IDB_BITMAP25            BITMAP                  "flags\\bmp\\fi.bmp"
-
 IDB_BITMAP26            BITMAP                  "flags\\bmp\\fr.bmp"
-
 IDB_BITMAP27            BITMAP                  "flags\\bmp\\gb.bmp"
-
 IDB_BITMAP28            BITMAP                  "flags\\bmp\\gr.bmp"
-
 IDB_BITMAP29            BITMAP                  "flags\\bmp\\hr.bmp"
-
 IDB_BITMAP30            BITMAP                  "flags\\bmp\\hu.bmp"
-
 IDB_BITMAP31            BITMAP                  "flags\\bmp\\ie.bmp"
-
 IDB_BITMAP32            BITMAP                  "flags\\bmp\\il.bmp"
-
 IDB_BITMAP33            BITMAP                  "flags\\bmp\\ir.bmp"
-
 IDB_BITMAP34            BITMAP                  "flags\\bmp\\it.bmp"
-
 IDB_BITMAP35            BITMAP                  "flags\\bmp\\jp.bmp"
-
 IDB_BITMAP36            BITMAP                  "flags\\bmp\\kr.bmp"
-
 IDB_BITMAP37            BITMAP                  "flags\\bmp\\kz.bmp"
-
 IDB_BITMAP38            BITMAP                  "flags\\bmp\\lt.bmp"
-
 IDB_BITMAP39            BITMAP                  "flags\\bmp\\lv.bmp"
-
 IDB_BITMAP40            BITMAP                  "flags\\bmp\\md.bmp"
-
 IDB_BITMAP41            BITMAP                  "flags\\bmp\\mk.bmp"
-
 IDB_BITMAP42            BITMAP                  "flags\\bmp\\mt.bmp"
-
 IDB_BITMAP43            BITMAP                  "flags\\bmp\\mx.bmp"
-
 IDB_BITMAP44            BITMAP                  "flags\\bmp\\my.bmp"
-
 IDB_BITMAP45            BITMAP                  "flags\\bmp\\n-a.bmp"
-
 IDB_BITMAP46            BITMAP                  "flags\\bmp\\nl.bmp"
-
 IDB_BITMAP47            BITMAP                  "flags\\bmp\\no.bmp"
-
 IDB_BITMAP48            BITMAP                  "flags\\bmp\\nz.bmp"
-
 IDB_BITMAP49            BITMAP                  "flags\\bmp\\pe.bmp"
-
 IDB_BITMAP50            BITMAP                  "flags\\bmp\\ph.bmp"
-
 IDB_BITMAP51            BITMAP                  "flags\\bmp\\pl.bmp"
-
 IDB_BITMAP52            BITMAP                  "flags\\bmp\\pt.bmp"
-
 IDB_BITMAP53            BITMAP                  "flags\\bmp\\ro.bmp"
-
 IDB_BITMAP54            BITMAP                  "flags\\bmp\\ru.bmp"
-
 IDB_BITMAP55            BITMAP                  "flags\\bmp\\se.bmp"
-
 IDB_BITMAP56            BITMAP                  "flags\\bmp\\si.bmp"
-
 IDB_BITMAP57            BITMAP                  "flags\\bmp\\sk.bmp"
-
 IDB_BITMAP58            BITMAP                  "flags\\bmp\\tr.bmp"
-
 IDB_BITMAP59            BITMAP                  "flags\\bmp\\tw.bmp"
-
 IDB_BITMAP60            BITMAP                  "flags\\bmp\\ua.bmp"
-
 IDB_BITMAP61            BITMAP                  "flags\\bmp\\uk.bmp"
-
 IDB_BITMAP62            BITMAP                  "flags\\bmp\\us.bmp"
-
 IDB_BITMAP63            BITMAP                  "flags\\bmp\\vn.bmp"
-
 IDB_BITMAP64            BITMAP                  "flags\\bmp\\ic.bmp"
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    IDD_MAIN, DIALOG
-    BEGIN
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-#endif    // English (United States) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United Kingdom) resources
+// English (U.K.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 #pragma code_page(1252)
+#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -285,19 +204,12 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_COMP                ICON                    "computer.ico"
-
 IDI_ICON1               ICON                    "icon1.ico"
-
 IDI_SERVER              ICON                    "icon2.ico"
-
 IDI_ICON3               ICON                    "icon3.ico"
-
 IDI_ICON4               ICON                    "icon4.ico"
-
 IDI_ICON5               ICON                    "icon5.ico"
-
 IDI_ICON6               ICON                    "icon6.ico"
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -305,7 +217,7 @@ IDI_ICON6               ICON                    "icon6.ico"
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
+GUIDELINES DESIGNINFO 
 BEGIN
     IDD_GSB_PROXY, DIALOG
     BEGIN
@@ -324,8 +236,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,10
- PRODUCTVERSION 1,0,0,10
+ FILEVERSION 1,0,0,12
+ PRODUCTVERSION 1,0,0,12
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -343,11 +255,11 @@ BEGIN
             VALUE "Comments", "daikatana server browser"
             VALUE "CompanyName", "maraakate.org"
             VALUE "FileDescription", "daikatana server browser"
-            VALUE "FileVersion", "1, 0, 0, 11"
+            VALUE "FileVersion", "1, 0, 0, 12"
             VALUE "InternalName", "gsb"
-            VALUE "LegalCopyright", "Copyright (C) 2021 maraakate.orgg Additional copyright (C) 2001-2007 r1ch.net"
+            VALUE "LegalCopyright", "Copyright (C) 2021 maraakate.org. Additional copyright (C) 2001-2007 r1ch.net"
             VALUE "ProductName", "daikatana server browser"
-            VALUE "ProductVersion", "1, 0, 0, 11"
+            VALUE "ProductVersion", "1, 0, 0, 12"
         END
     END
     BLOCK "VarFileInfo"
@@ -356,7 +268,7 @@ BEGIN
     END
 END
 
-#endif    // English (United Kingdom) resources
+#endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

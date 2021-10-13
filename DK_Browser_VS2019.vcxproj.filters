@@ -277,4 +277,9 @@
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="gpl.txt" />
+    <Text Include="readme_dkb.txt" />
+    <Text Include="TODO_DKB.txt" />
+  </ItemGroup>
 </Project>

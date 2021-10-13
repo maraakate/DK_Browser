@@ -102,6 +102,38 @@ static int lastSortOrder;
 //#define nParts 4
 void RequestHandler (void);
 
+
+typedef enum DKB_PROCESS_DPI_AWARENESS {
+	DKB_PROCESS_DPI_UNAWARE = 0,
+	DKB_PROCESS_SYSTEM_DPI_AWARE = 1,
+	DKB_PROCESS_PER_MONITOR_DPI_AWARE = 2
+} DKB_PROCESS_DPI_AWARENESS;
+
+static void SetHighDPIMode (void)
+{
+	/* For Vista, Win7 and Win8 */
+	BOOL(WINAPI * SetProcessDPIAware)(void) = NULL;
+
+	/* Win8.1 and later */
+	HRESULT(WINAPI * SetProcessDpiAwareness)(DKB_PROCESS_DPI_AWARENESS dpiAwareness) = NULL;
+	HINSTANCE userDLL;
+	HINSTANCE shcoreDLL;
+
+	userDLL = LoadLibrary("USER32.DLL");
+	if (userDLL)
+		SetProcessDPIAware = (BOOL(WINAPI *)(void))GetProcAddress(userDLL, "SetProcessDPIAware");
+
+	shcoreDLL = LoadLibrary("SHCORE.DLL");
+	if (shcoreDLL)
+		SetProcessDpiAwareness = (HRESULT(WINAPI *)(DKB_PROCESS_DPI_AWARENESS))GetProcAddress(shcoreDLL, "SetProcessDpiAwareness");
+
+
+	if (SetProcessDpiAwareness)
+		SetProcessDpiAwareness(DKB_PROCESS_PER_MONITOR_DPI_AWARE);
+	else if (SetProcessDPIAware)
+		SetProcessDPIAware();
+}
+
 _TCHAR *lstrstr (CONST _TCHAR *str1, CONST _TCHAR *lowered_str2)
 {
 	_TCHAR	*ret;
@@ -2675,6 +2707,8 @@ int PASCAL WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	common.dwSize = sizeof(common);
 	common.dwICC = ICC_BAR_CLASSES | ICC_LISTVIEW_CLASSES;
+
+	SetHighDPIMode();
 
 	InitCommonControlsEx (&common);
 

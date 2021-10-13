@@ -129,7 +129,11 @@ const column_t	columns[] =
 #define GAME_REQUEST_PACKET "\xFF\xFF\xFF\xFFstatus\n"
 #define QUERY_RESPONSE_HEADER_LEN	12
 #define QUERY_RESPONSE_SERVER_LEN	6
+#ifdef LAUNCH_FROM_CONFIG
 #define GAME_CMDLINE _T("\"%s\\%s\" +connect \"%s\"")
+#else
+#define GAME_CMDLINE _T("\"%s\" +connect \"%s\"")
+#endif
 #define GAME_REGPATH _T("SOFTWARE\\Gloom")
 #define GAME_REGKEY _T("InstallDir")
 

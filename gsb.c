@@ -312,6 +312,7 @@ void RunQ2 (NMITEMACTIVATE *info)
 
 	index = pitem.lParam;
 
+#ifdef LAUNCH_FROM_CONFIG
 	if (!q2Path[0])
 	{
 		for (drive = 3; drive <= 26; drive++ )
@@ -331,6 +332,7 @@ void RunQ2 (NMITEMACTIVATE *info)
 			}
 		}
 	}
+#endif
 
 	{
 		struct in_addr tmp;
@@ -347,12 +349,14 @@ void RunQ2 (NMITEMACTIVATE *info)
 
 	SetCursor(hcSave);
 
+#ifdef LAUNCH_FROM_CONFIG
 	if (!q2Path[0])
 	{
 		StatusBar (_T("Couldn't find a ") GAME_NAME _T(" executable!"));
 		MessageBox (hwndMain, _T("Unable to find your ") GAME_NAME _T(" executable!\r\n\r\nYou can't join a server until you have specified where ") GAME_NAME _T(" is on your system.\n\nTry setting the executable name manually in the config if you have a different executable name."), _T("Can't find ") GAME_NAME, MB_OK | MB_ICONEXCLAMATION);
 	}
 	else
+#endif
 	{
 		STARTUPINFO			s; 
 		_TCHAR				q2buff[MAX_PATH];
@@ -367,8 +371,11 @@ void RunQ2 (NMITEMACTIVATE *info)
 		memset (&s, 0, sizeof(s));
 		s.cb = sizeof(s);
 
+#ifdef LAUNCH_FROM_CONFIG
 		StringCbPrintf (q2buff, sizeof(q2buff), _T("%s\\%s"), myQ2Path, q2Exe);
-
+#else
+		StringCbPrintf (q2buff, sizeof(q2buff), _T("%s"), q2Exe);
+#endif
 		if (GetFileAttributes (q2buff) == -1)
 		{
 			_TCHAR buff[512];
@@ -378,10 +385,15 @@ void RunQ2 (NMITEMACTIVATE *info)
 			return;
 		}
 
+#ifdef LAUNCH_FROM_CONFIG
 		SetCurrentDirectory (myQ2Path);
 		StringCbPrintf (cmdLine, sizeof(cmdLine), GAME_CMDLINE, myQ2Path, q2Exe, Server);
 		CreateProcess (NULL, cmdLine, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, myQ2Path, &s, &p);
-
+#else
+		myQ2Path[0] = _T('\0');
+		StringCbPrintf (cmdLine, sizeof(cmdLine), GAME_CMDLINE, q2Exe, Server);
+		CreateProcess (NULL, cmdLine, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &s, &p);
+#endif
 		CloseHandle (p.hProcess);
 		CloseHandle (p.hThread);
 
@@ -551,6 +563,10 @@ int GetImageForVersion (_TCHAR *version)
 	_TCHAR	*lowered;
 
 	lowered = _tcsdup (version);
+	if (!lowered)
+	{
+		return -1;
+	}
 	_tcslwr_s (lowered, _tcslen(lowered)+1);
 
 	if (_tcsstr (lowered, _T("linux")))
@@ -711,6 +727,10 @@ char *GetLine (char **contents, int *len)
 			*len -= (num + 1);
 			line[num] = '\0';
 			ret = (char *)malloc (sizeof(line));
+			if (!ret)
+			{
+				return NULL;
+			}
 			StringCbCopyA (ret, sizeof(line), line);
 			return ret;
 		}
@@ -1880,6 +1900,10 @@ VOID InitMainDialog (HWND hWnd)
 #ifdef _UNICODE
 		char	*p;
 		p = (char *)_tcsdup (q2Buddies);
+		if (!p)
+		{
+			return;
+		}
 		HeapFree (GetProcessHeap(), 0, q2Buddies);
 		q2Buddies = HeapAlloc (GetProcessHeap(), 0, size * sizeof(_TCHAR));
 		MultiByteToWideChar (CP_ACP, 0, p, -1, q2Buddies, size);

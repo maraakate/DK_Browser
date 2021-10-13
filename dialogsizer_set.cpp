@@ -82,7 +82,7 @@ static inline int GetItemCount( const DialogSizerSizingItem *psd )
 //	are by scanning along them until I reach the last.
 {
 	int nCount = 0;
-	while( psd->uSizeInfo != 0xFFFFFFFF )
+	while( psd->uSizeInfo != UINT_MAX )
 	{
 		nCount++;
 		psd++;
@@ -129,7 +129,7 @@ static inline void CopyItems( DialogSizerSizingItem *psdDest, const DialogSizerS
 {
 	//
 	//	Loop til we reach the end
-	while( psdSource->uSizeInfo != 0xFFFFFFFF )
+	while( psdSource->uSizeInfo != UINT_MAX )
 	{
 		*psdDest = *psdSource;
 		psdDest++;
@@ -254,7 +254,7 @@ void UpdateWindowSize( const int cx, const int cy, HWND hwnd )
 		if (!nDeltaX && !nDeltaY)
 			return;
 
-		while( psd->uSizeInfo != 0xFFFFFFFF )
+		while( psd->uSizeInfo != UINT_MAX )
 		{
 			HWND hwndChild = GetDlgItem( hwnd, psd->uControlID );
 

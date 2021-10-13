@@ -1,4 +1,8 @@
 /*
+    Daikatana Server Browser
+    Copyright (C) 2021  Frank Sapone (maraakate.org)
+
+    Based on the code of
     Gloom Server Browser
     Copyright (C) 2001-2007  Richard Stanway (www.r1ch.net)
 
@@ -140,6 +144,10 @@ _TCHAR *lstrstr (CONST _TCHAR *str1, CONST _TCHAR *lowered_str2)
 	_TCHAR	*lowered;
 
 	lowered = _tcsdup (str1);
+	if (!lowered)
+	{
+		return NULL;
+	}
 	_tcslwr_s (lowered, _tcslen(lowered)+1);
 
 	ret = _tcsstr (lowered, lowered_str2);
@@ -522,9 +530,9 @@ int CALLBACK CompareFunc (LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	}
 	else
 	{
-		if (*(int *)((BYTE *)a + column->fofs) < *(int *)((BYTE *)b + column->fofs))
+		if (*(UINT_PTR *)((BYTE *)a + column->fofs) < *(UINT_PTR *)((BYTE *)b + column->fofs))
 			return -1 * inverted * column->defaultSort;
-		else if (*(int *)((BYTE *)a + column->fofs) > *(int *)((BYTE *)b + column->fofs))
+		else if (*(UINT_PTR *)((BYTE *)a + column->fofs) > *(UINT_PTR *)((BYTE *)b + column->fofs))
 			return 1 * inverted * column->defaultSort;
 		else
 			return 0;
@@ -746,6 +754,10 @@ char *GetLine (char **contents, int *len)
 	}
 
 	ret = (char *)malloc (sizeof(line));
+	if (!ret)
+	{
+		return NULL;
+	}
 	StringCbCopyA (ret, sizeof(line), line);
 	return ret;
 }
@@ -1192,7 +1204,7 @@ void RequestHandler (void)
 	handleArray[0] = hGotAllServers;
 	handleArray[1] = hTerminateScanEvent;
 
-	CreateThread (NULL, 0, (LPTHREAD_START_ROUTINE)QueryReader, NULL, 0, &threadID);
+	_beginthreadex (NULL, 0, (LPTHREAD_START_ROUTINE)QueryReader, NULL, 0, &threadID);
 
 	lastListRefresh = timeGetTime();
 
@@ -1311,7 +1323,7 @@ void GetServerList (void)
 		scanInProgress = FALSE;
 		EnableWindow (GetDlgItem (hwndMain, IDC_CONFIG), TRUE);
 		EnableWindow (GetDlgItem (hwndMain, IDC_UPDATE), TRUE);
-		ExitThread (1); 
+		_endthreadex (1); 
 	}
 
 	gotEOF = FALSE;
@@ -1331,7 +1343,7 @@ void GetServerList (void)
 		StringCbCopyA (queryBuff, sizeof(queryBuff), "query");
 		result = strlen (queryBuff);
 #elif QUERY_STYLE == 2
-		result = sprintf_s (queryBuff, sizeof(queryBuff), "\xFF\xFF\xFF\xFFgetservers daikatana");
+		result = sprintf_s (queryBuff, sizeof(queryBuff), "\xFF\xFF\xFF\xFF" "getservers daikatana");
 #if 0 /* FS: TODO: Implement. */
 		if (show_full)
 		{
@@ -1381,7 +1393,7 @@ void GetServerList (void)
 		StatusBar (_T("No response from ") MASTER_SERVER _T("."));
 		SetDlgItemText (hwndMain, IDC_UPDATE, _T("Update"));
 		EnableWindow (GetDlgItem (hwndMain, IDC_CONFIG), TRUE);
-		ExitThread (1);
+		_endthreadex (1);
 	}
 
 	numServers = 0;
@@ -1496,7 +1508,7 @@ reParse:
 	ResetEvent (hTerminateScanEvent);
 	scanInProgress = FALSE;
 
-	ExitThread (0);
+	_endthreadex (0);
 
 socketError:
 	closesocket (master);
@@ -1510,7 +1522,7 @@ socketError:
 	ResetEvent (hTerminateScanEvent);
 	scanInProgress = FALSE;
 
-	ExitThread (1);
+	_endthreadex (1);
 }
 
 void UpdateServerList (VOID)
@@ -1692,7 +1704,7 @@ VOID UpdateServers (VOID)
 	EnableWindow (GetDlgItem (hwndMain, IDC_CONFIG), FALSE);
 	EnableWindow (GetDlgItem (hwndMain, IDC_MOD), FALSE);
 	scanInProgress = TRUE;
-	PingHandle = CreateThread (NULL, 0, (LPTHREAD_START_ROUTINE)GetServerList, 0, 0, &PingThreadID);
+	PingHandle = (HANDLE)_beginthreadex (NULL, 0, (LPTHREAD_START_ROUTINE)GetServerList, 0, 0, &PingThreadID);
 	if (PingHandle)
 		CloseHandle (PingHandle);
 }
@@ -2438,8 +2450,6 @@ VOID FillServerListView (NMLVDISPINFO *info)
 		case INFO_PING:
 		{
 #if 1
-			_TCHAR buff[256];
-
 			info->item.mask |= LVIF_IMAGE;
 			if (server->ping <= q2GoodPing)
 				info->item.iImage = 1;
@@ -2459,7 +2469,6 @@ VOID FillServerListView (NMLVDISPINFO *info)
 		{
 #if 1
 			IN_ADDR tmp;
-			_TCHAR buff[256] = { 0 };
 
 			//info->item.mask |= LVIF_IMAGE;
 			//info->item.iImage = 7 + server->cID;

@@ -303,7 +303,11 @@ void RunQ2 (NMITEMACTIVATE *info)
 	{
 		struct in_addr tmp;
 		tmp.S_un.S_addr = servers[index].ip;
+#ifdef _UNICODE
 		StringCbPrintf (Server, sizeof(Server), _T("%S:%d"), inet_ntoa(tmp), servers[index].port); 
+#else
+		StringCbPrintf (Server, sizeof(Server), _T("%s:%d"), inet_ntoa(tmp), servers[index].port); 
+#endif
 	}
 
 	//busy = FALSE;
@@ -866,7 +870,7 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 	if (serverInfo[INFO_GAMEDATE])
 	{
 		_TCHAR	*p;
-		_TCHAR *built = L"Built ";
+		_TCHAR *built = _T("Built ");
 		int		sc = 0;
 
 #ifdef _UNICODE
@@ -875,7 +879,7 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 		Q_strncpy (server->szGameDate, serverInfo[INFO_GAMEDATE], sizeof(server->szGameDate)-1);
 #endif
 
-		p = wcsstr(server->szGameDate, built);
+		p = _tcsstr(server->szGameDate, built);
 		if (p)
 		{
 			StringCbCopy(server->szGameDate, sizeof(server->szGameDate), p + 6);
@@ -894,8 +898,8 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 		}
 	}
 
-	len = wcslen(server->szGameDate)-1;
-	server->szGameDate[len] = L'\0';
+	len = _tcslen(server->szGameDate)-1;
+	server->szGameDate[len] = _T('\0');
 
 	free (rLine);
 
@@ -1938,7 +1942,11 @@ VOID ShowServerContextMenu (LPNMITEMACTIVATE ev)
 		index = pitem.lParam;
 
 		tmp.S_un.S_addr = servers[index].ip;
+#ifdef _UNICODE
 		StringCbPrintf (serverIP, sizeof(serverIP), _T("%S:%d"), inet_ntoa(tmp), servers[index].port); 
+#else
+		StringCbPrintf (serverIP, sizeof(serverIP), _T("%s:%d"), inet_ntoa(tmp), servers[index].port); 
+#endif
 
 		cch = _tcslen (serverIP);
 
@@ -1954,8 +1962,12 @@ VOID ShowServerContextMenu (LPNMITEMACTIVATE ev)
 		lptstrCopy[cch] = (TCHAR) 0;
 		GlobalUnlock(hglbCopy); 
 
-		// Place the handle on the clipboard. 
-		SetClipboardData (CF_UNICODETEXT, hglbCopy); 
+		// Place the handle on the clipboard.
+#ifdef _UNICODE
+		SetClipboardData (CF_UNICODETEXT, hglbCopy);
+#else
+		SetClipboardData (CF_TEXT, hglbCopy);
+#endif
 
 		CloseClipboard ();
 	}
@@ -2262,7 +2274,11 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 						pResult |= CDRF_SKIPDEFAULT;
 
 						tmp.S_un.S_addr = server->ip;
+#ifdef _UNICODE
 						StringCchPrintf (szText, sizeof(szText), _T("%S:%d"), inet_ntoa (tmp), server->port);
+#else
+						StringCchPrintf (szText, sizeof(szText), _T("%s:%d"), inet_ntoa (tmp), server->port);
+#endif
 
 						ListView_GetSubItemRect (hWndList, iRow, 1, LVIR_BOUNDS, &rc2);
 						rc2.left += rc.right - rc.left - 12;

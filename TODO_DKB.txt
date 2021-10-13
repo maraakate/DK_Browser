@@ -1,0 +1,15 @@
+TODO as of 10/13/21:
+
+* Have better layout for players which shows score, ping, team, etc.
+* Double click player to get an expanded layout which could even show character
+  and other userinfo strings.
+* Remove path option from Config.  Re-adjust this dialog box.
+* Add about dialog box.
+* Right click on server and get serverinfo strings for more detailed
+  info.
+* Server favourites highlighting and sorting.
+* Ability to play a sound when buddy is found.
+* Minimize to tray.
+* Add query every X seconds option to config.
+* Move config to an INI/CFG file for portability.
+* Auto-updater.

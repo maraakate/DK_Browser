@@ -289,7 +289,7 @@ void RunQ2 (NMITEMACTIVATE *info)
 	LVITEM		pitem;
 	BOOL foundIt = FALSE;
 	_TCHAR		 Server[128];
-	int			drive, index;
+	int			index;
 	int size = MAX_PATH;
 
 	if (info->iItem == -1)
@@ -315,6 +315,8 @@ void RunQ2 (NMITEMACTIVATE *info)
 #ifdef LAUNCH_FROM_CONFIG
 	if (!q2Path[0])
 	{
+		int drive;
+
 		for (drive = 3; drive <= 26; drive++ )
 		{
 			_TCHAR	*temp;

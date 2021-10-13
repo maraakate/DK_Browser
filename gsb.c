@@ -140,7 +140,7 @@ _TCHAR *lstrstr (CONST _TCHAR *str1, CONST _TCHAR *lowered_str2)
 	_TCHAR	*lowered;
 
 	lowered = _tcsdup (str1);
-	_tcslwr (lowered);
+	_tcslwr_s (lowered, strlen(lowered)+1);
 
 	ret = _tcsstr (lowered, lowered_str2);
 	free (lowered);
@@ -551,7 +551,7 @@ int GetImageForVersion (_TCHAR *version)
 	_TCHAR	*lowered;
 
 	lowered = _tcsdup (version);
-	_tcslwr (lowered);
+	_tcslwr_s (lowered, strlen(lowered)+1);
 
 	if (_tcsstr (lowered, _T("linux")))
 		image = 4;
@@ -1275,7 +1275,7 @@ void GetServerList (void)
 #ifdef _UNICODE
 	WideCharToMultiByte (CP_ACP, 0, MASTER_SERVER, -1, queryBuff, sizeof(queryBuff)-1, NULL, NULL);
 #else
-	strcpy (queryBuff, MASTER_SERVER);
+	Q_strncpy (queryBuff, MASTER_SERVER, sizeof(queryBuff)-1);
 #endif
 
 	hp = gethostbyname (queryBuff);
@@ -1307,7 +1307,7 @@ void GetServerList (void)
 		StringCbCopyA (queryBuff, sizeof(queryBuff), "query");
 		result = strlen (queryBuff);
 #elif QUERY_STYLE == 2
-		result = sprintf (queryBuff, "\xFF\xFF\xFF\xFFgetservers daikatana");
+		result = sprintf_s (queryBuff, sizeof(queryBuff), "\xFF\xFF\xFF\xFFgetservers daikatana");
 #if 0 /* FS: TODO: Implement. */
 		if (show_full)
 		{
@@ -1750,7 +1750,6 @@ VOID ParseBuddyList (VOID)
 
 VOID InitMainDialog (HWND hWnd)
 {
-	DWORD			tid;
 	int				version;
 	int				i = 0;
 	HKEY			hk;
@@ -2277,10 +2276,8 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 
 					if (lvcd->iSubItem == 1)
 					{
-						DWORD		i;
 						_TCHAR		szText[64];
 						IN_ADDR	tmp;
-						HIMAGELIST	list;
 						RECT		rc, rc2;
 						HBRUSH		bg = NULL;
 
@@ -2388,8 +2385,6 @@ VOID SortServerListView (NMLVDISPINFO *info)
 
 VOID FillServerListView (NMLVDISPINFO *info)
 {
-	IN_ADDR 			tmp;
-	// _TCHAR				buff[512];
 	int					index;
 	const column_t		*column;
 	const SERVERINFO	*server;

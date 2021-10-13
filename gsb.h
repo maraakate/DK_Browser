@@ -23,6 +23,7 @@
 #define CINTERFACE
 #include "dialogsizer.h"
 
+#pragma warning (disable : 4996)
 
 typedef struct _PLAYERINFO
 {

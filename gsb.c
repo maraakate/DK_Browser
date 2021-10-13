@@ -162,6 +162,7 @@ VOID StatusBar (LPCTSTR fmt, ...)
 	SendMessage (hWndStatus, SB_SETTEXT, (WPARAM) 0, (LPARAM)buff);
 }
 
+#ifdef LAUNCH_FROM_CONFIG
 _TCHAR *HPIFindTADir (_TCHAR *Path)
 {
 	_TCHAR *TAdir;
@@ -229,6 +230,7 @@ _TCHAR *HPIFindTADir (_TCHAR *Path)
 	FindClose(hSearch);
 	return NULL;
 }
+#endif
 
 void SaveStuff(void)
 {
@@ -2299,7 +2301,7 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 					{
 						lvcd->clrTextBk = RGB(255, 255, 0);
 					}
-
+#if 0
 					if (lvcd->iSubItem == 1)
 					{
 						_TCHAR		szText[64];
@@ -2373,6 +2375,7 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 
 						DrawText (nmcd->hdc, szText, _tcslen(szText), &rc2, DT_LEFT);
 					}
+#endif
 				}
 				/*if (bHighlighted)
 				{
@@ -2432,17 +2435,47 @@ VOID FillServerListView (NMLVDISPINFO *info)
 			StringCchCopy (info->item.pszText, info->item.cchTextMax, server->szHostName);
 			break;
 
-		case INFO_IPADDRESS:
-			//info->item.mask |= LVIF_IMAGE;
+		case INFO_PING:
+		{
+#if 1
+			_TCHAR buff[256];
 
-			//info->item.iImage = 7 + server->cID;
-#if 0
-			tmp.S_un.S_addr = server->ip;
-			_stprintf (buff, _T("%S:%d"), inet_ntoa (tmp), servers->port);
-			_tcscpy (info->item.pszText, buff);
-			StringCchPrintf (info->item.pszText, info->item.cchTextMax, _T("%S:%d"), inet_ntoa (tmp), server->port);
+			info->item.mask |= LVIF_IMAGE;
+			if (server->ping <= q2GoodPing)
+				info->item.iImage = 1;
+			else if (server->ping <= q2MediumPing)
+				info->item.iImage = 2;
+			else
+				info->item.iImage = 3;
+
+			info->item.pszText[0] = _T('\0');
+			StringCchPrintf (info->item.pszText, info->item.cchTextMax, _T("  %d"), server->ping);
+#else
+			info->item.pszText[0] = _T('\0');
 #endif
-			info->item.pszText[0] = '\0';
+		}
+			break;
+		case INFO_IPADDRESS:
+		{
+#if 1
+			IN_ADDR tmp;
+			_TCHAR buff[256] = { 0 };
+
+			//info->item.mask |= LVIF_IMAGE;
+			//info->item.iImage = 7 + server->cID;
+
+			tmp.S_un.S_addr = server->ip;
+
+			info->item.pszText[0] = _T('\0');
+#ifdef _UNICODE
+			StringCchPrintf (info->item.pszText, info->item.cchTextMax, _T("%S:%d"), inet_ntoa (tmp), server->port);
+#else
+			StringCchPrintf (info->item.pszText, info->item.cchTextMax, _T("%s:%d"), inet_ntoa (tmp), server->port);
+#endif // _UNICODE
+#else
+			info->item.pszText[0] = _T('\0');
+#endif // 1
+		}
 			break;
 
 		case INFO_MAP_NAME:

@@ -119,11 +119,11 @@ static void SetHighDPIMode (void)
 	HINSTANCE userDLL;
 	HINSTANCE shcoreDLL;
 
-	userDLL = LoadLibrary("USER32.DLL");
+	userDLL = LoadLibrary(_T("USER32.DLL"));
 	if (userDLL)
 		SetProcessDPIAware = (BOOL(WINAPI *)(void))GetProcAddress(userDLL, "SetProcessDPIAware");
 
-	shcoreDLL = LoadLibrary("SHCORE.DLL");
+	shcoreDLL = LoadLibrary(_T("SHCORE.DLL"));
 	if (shcoreDLL)
 		SetProcessDpiAwareness = (HRESULT(WINAPI *)(DKB_PROCESS_DPI_AWARENESS))GetProcAddress(shcoreDLL, "SetProcessDpiAwareness");
 
@@ -140,7 +140,7 @@ _TCHAR *lstrstr (CONST _TCHAR *str1, CONST _TCHAR *lowered_str2)
 	_TCHAR	*lowered;
 
 	lowered = _tcsdup (str1);
-	_tcslwr_s (lowered, strlen(lowered)+1);
+	_tcslwr_s (lowered, _tcslen(lowered)+1);
 
 	ret = _tcsstr (lowered, lowered_str2);
 	free (lowered);
@@ -170,7 +170,7 @@ _TCHAR *HPIFindTADir (_TCHAR *Path)
 	_TCHAR myPath[MAX_PATH];
 	_TCHAR szNewPath[MAX_PATH]; 
 	_TCHAR	*pathPtr;
-	int		pathLen;
+	SIZE_T		pathLen;
 
 	BOOL fFinished = FALSE; 
 
@@ -551,7 +551,7 @@ int GetImageForVersion (_TCHAR *version)
 	_TCHAR	*lowered;
 
 	lowered = _tcsdup (version);
-	_tcslwr_s (lowered, strlen(lowered)+1);
+	_tcslwr_s (lowered, _tcslen(lowered)+1);
 
 	if (_tcsstr (lowered, _T("linux")))
 		image = 4;
@@ -667,7 +667,7 @@ HWND LV_CreateListView (HWND hWndParent, HINSTANCE hInst, int NumServers,
 	SendMessage(hWndStatus, SB_SETPARTS, (WPARAM) 3, 
 		(LPARAM) width);
 
-	SetWindowLong (hWndStatus, GWL_ID, IDC_STATUSBAR);
+	SetWindowLongPtr (hWndStatus, GWL_ID, IDC_STATUSBAR);
 
 	icon = (HICON)LoadImage(hThisInstance, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 16, 14, LR_DEFAULTCOLOR);
 	SendMessage(hWndStatus, SB_SETICON, (WPARAM)(INT) 1, 
@@ -752,7 +752,7 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 	DWORD		now, msecs;
 	int			players;
 	int			i;
-	int len = 0;
+	SIZE_T len = 0;
 	char		*token, *seps, *p, *rLine;
 	LVITEM		lvI;
 	char		*serverInfo[INFO_MAX];
@@ -1691,7 +1691,7 @@ VOID ParseBuddyList (VOID)
 	_TCHAR	*p;
 	INT		x;
 	_TCHAR	buddy[32];
-	int		len;
+	SIZE_T		len;
 
 	numBuddies = 0;
 
@@ -1848,7 +1848,7 @@ VOID InitMainDialog (HWND hWnd)
 		size = sizeof (winPlacement);
 		if (RegQueryValueEx (hk, _T("Window Position"), 0, NULL, (LPBYTE)&winPlacement, (LPDWORD)&size) == ERROR_SUCCESS)
 		{
-			if (!(GetWindowLong (hwndMain, GWL_STYLE) & WS_VISIBLE))
+			if (!(GetWindowLongPtr (hwndMain, GWL_STYLE) & WS_VISIBLE))
 				winPlacement.showCmd = SW_HIDE;
 			SetWindowPlacement (hwndMain, &winPlacement);
 		}
@@ -1952,7 +1952,7 @@ VOID ShowServerContextMenu (LPNMITEMACTIVATE ev)
 		struct	in_addr tmp;	
 		DWORD	index;
 		LVITEM	pitem;
-		DWORD	cch;
+		SIZE_T	cch;
 		LPTSTR  lptstrCopy; 
 		HGLOBAL hglbCopy;
 		_TCHAR	serverIP[64];
@@ -2540,7 +2540,7 @@ LRESULT CALLBACK WndProcMain(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 					switch (((LPNMHDR)lParam)->code)
 					{
 						case NM_CUSTOMDRAW:
-							SetWindowLong (hWnd, DWL_MSGRESULT, CustomDrawHandler (hWndList, wParam, lParam));
+							SetWindowLongPtr (hWnd, DWLP_MSGRESULT, CustomDrawHandler (hWndList, wParam, lParam));
 							return TRUE;
 						case LVN_ITEMCHANGED:
 							UpdatePlayerList ();
@@ -2563,7 +2563,7 @@ LRESULT CALLBACK WndProcMain(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 						switch (((LPNMHDR) lParam)->code)
 						{
 							case NM_CUSTOMDRAW:
-								SetWindowLong (hWnd, DWL_MSGRESULT, CustomDrawHandler (hWndPlayerList, wParam, lParam));
+								SetWindowLongPtr (hWnd, DWLP_MSGRESULT, CustomDrawHandler (hWndPlayerList, wParam, lParam));
 								return TRUE;
 							case NM_RCLICK:
 								if (g_isXP)
@@ -2623,7 +2623,7 @@ LRESULT CALLBACK WndProcMain(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 
 void GetResultsFromProxyDialog (HWND hDlg)
 {
-	int	size;
+	SIZE_T	size;
 
 	memset (q2Path, 0, sizeof(q2Path));
 	memset (q2Exe, 0, sizeof(q2Exe));

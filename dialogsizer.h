@@ -46,7 +46,7 @@ typedef struct DialogSizerSizingItem	//	sdi
 
 #define DIALOG_SIZER_START( name )	DialogSizerSizingItem name[] = {
 #define DIALOG_SIZER_ENTRY( controlID, flags )	{ controlID, flags },
-#define DIALOG_SIZER_END()	{ 0xFFFFFFFF, 0xFFFFFFFF } };
+#define DIALOG_SIZER_END()	{ SIZE_MAX, SIZE_MAX } };
 
 //
 //	Set a window as sizeable, passing the registry key and name to load/store the window

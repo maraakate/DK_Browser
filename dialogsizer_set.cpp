@@ -167,11 +167,10 @@ static DialogData * AddDialogData( HWND hwnd )
 		SetProp( hwnd, pcszDialogDataPropertyName, reinterpret_cast<HANDLE>( pdd ) );
 		UpdateGripperRect( pdd->m_sizeClient.cx, pdd->m_sizeClient.cy, &pdd->rcGrip );
 
-
 		//
 		//	Because we have successffuly created our data we need to subclass the control now, if not
 		//	we could end up in a situation where our data was never freed.
-		SetProp( hwnd, pcszWindowProcPropertyName, reinterpret_cast<HANDLE>( SetWindowLong( hwnd, GWL_WNDPROC, reinterpret_cast<LONG>( SizingProc ) ) ) );
+		SetProp( hwnd, pcszWindowProcPropertyName, reinterpret_cast<HANDLE>( SetWindowLongPtr( hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>( SizingProc ) ) ) );
 	}
 	return pdd;
 }
@@ -420,7 +419,7 @@ static LRESULT CALLBACK SizingProc( HWND hwnd, UINT msg, WPARAM wParam, LPARAM l
 				(void)RemoveProp( hwnd, pcszDialogDataPropertyName );
 			}
 
-			(void)SetWindowLong( hwnd, GWL_WNDPROC, reinterpret_cast<LONG>( pOldProc ) );
+			(void)SetWindowLongPtr( hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>( pOldProc ) );
 			(void)RemoveProp( hwnd, pcszWindowProcPropertyName );
 		}
 		break;

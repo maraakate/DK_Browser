@@ -8,6 +8,7 @@
 #define IDI_COMP                        106
 #define IDC_GSB                         109
 #define IDC_OKPING                      109
+#define IDC_ABOUT                       110
 #define IDR_MAINFRAME                   128
 #define IDI_Q2                          132
 #define IDI_ICON1                       134
@@ -27,7 +28,7 @@
 #define IDI_LINUX                       169
 #define IDI_FREEBSD                     170
 #define IDI_MACOSX                      171
-#define	IDB_BITMAP0						236
+#define IDB_BITMAP0                     236
 #define IDB_BITMAP1                     237
 #define IDB_BITMAP2                     238
 #define IDB_BITMAP3                     239
@@ -92,6 +93,7 @@
 #define IDB_BITMAP62                    298
 #define IDB_BITMAP63                    299
 #define IDB_BITMAP64                    300
+#define IDD_ABOUTBOX                    301
 #define IDC_PROGRESS1                   1001
 #define IDC_PRETTY                      1002
 #define IDC_CANCEL                      1003
@@ -123,9 +125,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        300
+#define _APS_NEXT_RESOURCE_VALUE        302
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         1036
-#define _APS_NEXT_SYMED_VALUE           110
+#define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

@@ -1808,13 +1808,19 @@ VOID InitMainDialog (HWND hWnd)
 
 	g_isXP = ( (osvi.dwMajorVersion > 5) || ( (osvi.dwMajorVersion == 5) && (osvi.dwMinorVersion >= 1) ));
 
-	error = WSAStartup ((WORD)MAKEWORD (1,1), &ws);
-
+	error = WSAStartup ((WORD)MAKEWORD (2,2), &ws);
 	if (error)
 	{
 		MessageBox (hwndMain, _T("Couldn't load Winsock!"), _T("Error"), MB_OK);
 		PostQuitMessage (1);
 		return;
+	}
+
+	if (LOBYTE(ws.wVersion) != 2 || HIBYTE(ws.wHighVersion) != 2)
+	{
+		MessageBox(hwndMain, _T("Could not find a usable version of Winsock.dll"), _T("Error"), MB_OK);
+		WSACleanup();
+		PostQuitMessage(1);
 	}
 
 	numServers = 0;
@@ -2536,13 +2542,10 @@ VOID FillServerListView (NMLVDISPINFO *info)
 //
 LRESULT CALLBACK WndProcMain(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-//	_TCHAR	buff[512];
 	int		wmId, wmEvent;
 
 	switch (message)
 	{
-		//case UM_INIT2 :
-		//	return WndProcMainInit2(hWnd, message, wParam, (LONG)lParam);
 		case WM_CREATE:
 			return TRUE;
 		case WM_INITDIALOG:
@@ -2560,20 +2563,17 @@ LRESULT CALLBACK WndProcMain(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 			// Parse the menu selections:
 			switch (wmId)
 			{
-				//case IDC_UPDATE:
-				//	DoServerRefresh ();
-				//	break;
 				case IDC_UPDATE:
-					//DialogBox(hThisInstance, (LPCTSTR)IDD_ABOUTBOX, hWnd, (DLGPROC)About);
 					UpdateServers ();
 					break;
 				case IDC_CONFIG:
 					DialogBox(hThisInstance, (LPCTSTR)IDD_GSB_PROXY, hWnd, (DLGPROC)Proxy);
 					break;
+				case IDC_ABOUT:
+					DialogBox(hThisInstance, (LPCTSTR)IDD_ABOUTBOX, hWnd, (DLGPROC)About);
+					break;
 				case IDC_EXIT:
-					//SaveStuff();
 					DestroyWindow (hwndMain);
-					//PostQuitMessage (0);
 					break;
 				case IDC_MOD:
 					if (wmEvent == CBN_SELCHANGE)
@@ -2585,7 +2585,7 @@ LRESULT CALLBACK WndProcMain(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 						UpdateServerList ();
 					break;
 				default:
-					return FALSE;//DefDlgProc(hWnd, message, wParam, lParam);
+					return FALSE;
 			}
 			break;
 		/*case WM_PAINT:
@@ -2724,6 +2724,11 @@ void GetResultsFromProxyDialog (HWND hDlg)
 
 	if (q2Path[0] && q2Path[_tcslen(q2Path)-1] != '\\')
 		StringCbCat (q2Path, sizeof(q2Path), _T("\\"));
+}
+
+LRESULT CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	return FALSE;
 }
 
 // Message handler for about box.

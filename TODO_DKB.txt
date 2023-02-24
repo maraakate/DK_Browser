@@ -4,9 +4,8 @@ TODO as of 02/23/23:
 * Double click player to get an expanded layout which could even show character
   and other userinfo strings.
 * Remove path option from Config.  Re-adjust this dialog box.
-* Add about dialog box.
-* Right click on server and get serverinfo strings for more detailed
-  info.
+* Polish the about dialog box.
+* Polish serverinfo strings right-click context.
 * Server favourites highlighting and sorting.
 * Ability to play a sound when buddy is found.
 * Add query every X seconds option to config.

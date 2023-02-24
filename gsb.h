@@ -53,6 +53,7 @@ typedef struct _SERVERINFO
 	int			timelimit;
 	int			reservedSlots;
 	int			cID;
+	_TCHAR		infostrings[1536];
 } SERVERINFO;
 
 enum

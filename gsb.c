@@ -53,7 +53,8 @@ do { \
 
 #define ID_TRAY_ICON						5500
 #define ID_TRAY_RESTORE_CONTEXT_MENU_ITEM	3500
-#define ID_TRAY_QUIT_CONTEXT_MENU_ITEM		3501
+#define ID_TRAY_ABOUT_CONTEXT_MENU_ITEM		3501
+#define ID_TRAY_QUIT_CONTEXT_MENU_ITEM		3502
 #define WM_TRAYICON						(WM_USER + 1)
 
 HMENU		hTrayMenu;	// tray icon menu
@@ -803,6 +804,7 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 	char		*serverInfo[INFO_MAX];
 	char		*next_token;
 
+	mbstowcs(server->infostrings, (_TCHAR *)(recvBuff + 10), tsizeof(server->infostrings) - 1);
 	now = timeGetTime();
 
 	server->gotResponse = TRUE;
@@ -975,11 +977,19 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 		}
 	}
 
-	len = _tcslen(server->szGameDate)-1;
+	len = _tcslen(server->szGameDate);
 #ifdef _UNICODE
 	if (len >= (sizeof(server->szGameDate) / sizeof(*server->szGameDate)) - 1)
 		len = (sizeof(server->szGameDate) / sizeof(*server->szGameDate)) - 1;
 #endif
+
+	if (len > 0)
+	{
+		/* FS: Builds before 2022 are reporting a period at the end.  So fix it here. */
+		if (server->szGameDate[len - 1] == _T('.'))
+			len--;
+	}
+
 	server->szGameDate[len] = _T('\0');
 
 	free (rLine);
@@ -1843,6 +1853,7 @@ VOID InitMainDialog (HWND hWnd)
 	{
 		DIALOG_SIZER_START( sz )
 			DIALOG_SIZER_ENTRY( IDC_CONFIG, DS_MoveX | DS_MoveY )
+			DIALOG_SIZER_ENTRY( IDC_ABOUT, DS_MoveX | DS_MoveY )
 			DIALOG_SIZER_ENTRY( IDC_UPDATE, DS_MoveX | DS_MoveY )
 			DIALOG_SIZER_ENTRY( IDC_EXIT, DS_MoveX | DS_MoveY )
 			DIALOG_SIZER_ENTRY( IDC_SERVERLIST, DS_SizeX | DS_SizeY )
@@ -2001,6 +2012,7 @@ VOID ShowServerContextMenu (LPNMITEMACTIVATE ev)
 
 	AppendMenu (menu, MF_STRING, 1, _T("Connect"));
 	AppendMenu (menu, MF_STRING, 2, _T("Copy Server IP"));
+	AppendMenu (menu, MF_STRING, 3, _T("Server Info"));
 
 	ClientToScreen (hwndMain, &ev->ptAction); 
 
@@ -2062,6 +2074,24 @@ VOID ShowServerContextMenu (LPNMITEMACTIVATE ev)
 #endif
 
 		CloseClipboard ();
+	}
+	else if (i == 3)
+	{
+		DWORD	index;
+		LVITEM	pitem;
+
+		memset (&pitem, 0, sizeof(pitem));
+
+		pitem.iItem = ev->iItem;
+		pitem.iSubItem = 0;
+		pitem.mask = LVIF_PARAM;
+
+		SendMessage (hWndList, LVM_GETITEM, 0, (LPARAM)(LPLVITEM)&pitem);
+
+		index = pitem.lParam;
+
+		/* FS: TODO: Format this in a way that's not crap. */
+		MessageBox(hwndMain, servers[index].infostrings, _T("Server Info"), MB_OK);
 	}
 
 abortMenu:
@@ -2595,6 +2625,7 @@ LRESULT CALLBACK WndProcMain(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 			InitMainDialog (hWnd);
 			hTrayMenu = CreatePopupMenu();
 			AppendMenu (hTrayMenu, MF_STRING, ID_TRAY_RESTORE_CONTEXT_MENU_ITEM, TEXT("Restore"));
+			AppendMenu (hTrayMenu, MF_STRING, ID_TRAY_ABOUT_CONTEXT_MENU_ITEM, TEXT("About"));
 			AppendMenu (hTrayMenu, MF_SEPARATOR, 0, 0);
 			AppendMenu (hTrayMenu, MF_STRING, ID_TRAY_QUIT_CONTEXT_MENU_ITEM, TEXT("Quit"));
 			return TRUE;
@@ -2630,6 +2661,10 @@ LRESULT CALLBACK WndProcMain(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 				{
 					SaveStuff();
 					PostQuitMessage(0);
+				}
+				else if (itemClicked == ID_TRAY_ABOUT_CONTEXT_MENU_ITEM)
+				{
+					DialogBox(hThisInstance, (LPCTSTR)IDD_ABOUTBOX, hwndMain, (DLGPROC)About);
 				}
 			}
 			break;
@@ -2809,6 +2844,20 @@ void GetResultsFromProxyDialog (HWND hDlg)
 
 LRESULT CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	switch (message)
+	{
+		case WM_CLOSE:
+			EndDialog(hDlg, 0);
+			return TRUE;
+		case WM_COMMAND:
+			if (LOWORD(wParam) == IDOK)
+			{
+				EndDialog(hDlg, 0);
+				return TRUE;
+			}
+			break;
+	}
+
 	return FALSE;
 }
 

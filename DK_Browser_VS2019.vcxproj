@@ -195,6 +195,9 @@
     <Text Include="readme_dkb.txt" />
     <Text Include="TODO_DKB.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="DK_Browser.exe.manifest" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

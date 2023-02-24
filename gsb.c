@@ -425,8 +425,6 @@ void LaunchDK (NMITEMACTIVATE *info)
 
 BOOL InitListViewImageLists(HWND hWndListView)
 {
-	int	i;
-
 	HICON hiconItem;     // icon for list-view items 
 	// HIMAGELIST hLarge;   // image list for icon view 
 	HIMAGELIST hSmall;   // image list for other views 
@@ -2204,7 +2202,8 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 						lvcd->clrTextBk = RGB(255, 255, 0);
 					}
 
-					/*if (lvcd->iSubItem == 1)
+#if 0
+					if (lvcd->iSubItem == 1)
 					{
 						DWORD		i;
 						_TCHAR		szText[64];
@@ -2225,7 +2224,7 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 						else if (SendMessage (hWndList, LVM_GETNEXTITEM, -1, LVNI_ALL | LVNI_SELECTED) == iRow)
 							bg = (HBRUSH)(COLOR_INACTIVEBORDER+1);
 
-						ListView_GetSubItemRect (hWndList, iRow, 1, LVIR_BOUNDS, &rc2);
+						ListView_GetSubItemRect (hWndList, iRow, lvcd->iSubItem, LVIR_BOUNDS, &rc2);
 
 						if (bg)
 						{
@@ -2235,13 +2234,13 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 						else
 							FillRect (nmcd->hdc, &rc2, (HBRUSH)(COLOR_WINDOW+1));
 
-						ListView_GetSubItemRect (hWndList, iRow, 1, LVIR_ICON, &rc);
+						ListView_GetSubItemRect (hWndList, iRow, lvcd->iSubItem, LVIR_ICON, &rc);
 						pResult |= CDRF_DOERASE | CDRF_NOTIFYPOSTPAINT;
 
 						tmp.S_un.S_addr = server->ip;
 						StringCchPrintf (szText, sizeof(szText), _T("aa%S:%d"), inet_ntoa (tmp), server->port);
 
-						ListView_GetSubItemRect (hWndList, iRow, 1, LVIR_BOUNDS, &rc2);
+						ListView_GetSubItemRect (hWndList, iRow, lvcd->iSubItem, LVIR_BOUNDS, &rc2);
 						rc2.left += rc.right - rc.left + 8;
 						DrawText (nmcd->hdc, szText, _tcslen(szText), &rc2, DT_LEFT);
 					}
@@ -2266,7 +2265,7 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 						else if (SendMessage (hWndList, LVM_GETNEXTITEM, -1, LVNI_ALL | LVNI_SELECTED) == iRow)
 							bg = (HBRUSH)(COLOR_INACTIVEBORDER+1);
 
-						ListView_GetSubItemRect (hWndList, iRow, 6, LVIR_BOUNDS, &rc2);
+						ListView_GetSubItemRect (hWndList, iRow, lvcd->iSubItem, LVIR_BOUNDS, &rc2);
 
 						if (bg)
 						{
@@ -2276,7 +2275,7 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 						else
 							FillRect (nmcd->hdc, &rc2, (HBRUSH)(COLOR_WINDOW+1));
 
-						ListView_GetSubItemRect (hWndList, iRow, 6, LVIR_ICON, &rc);
+						ListView_GetSubItemRect (hWndList, iRow, lvcd->iSubItem, LVIR_ICON, &rc);
 						list = ListView_GetImageList (hWndList, LVSIL_SMALL);
 
 						if (server->ping <= q2GoodPing)
@@ -2291,10 +2290,14 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 
 						StringCchPrintf (szText, sizeof(szText), _T("%d"), server->ping);
 
-						ListView_GetSubItemRect (hWndList, iRow, 6, LVIR_BOUNDS, &rc2);
+						ListView_GetSubItemRect (hWndList, iRow, lvcd->iSubItem, LVIR_BOUNDS, &rc2);
 						rc2.left += rc.right - rc.left + 6;
 						DrawText (nmcd->hdc, szText, _tcslen(szText), &rc2, DT_LEFT);
-					}*/
+					}
+					else
+					{
+					}
+#endif
 				}
 				else if (hWnd == hWndPlayerList)
 				{
@@ -2315,7 +2318,6 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 						lvcd->clrTextBk = RGB(255, 255, 0);
 					}
 				}
-
 
 				break;
 			}
@@ -2366,22 +2368,22 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 						RECT		rc, rc2;
 						HBRUSH		bg = NULL;
 
-						/*if (nmcd->uItemState & CDIS_FOCUS)
+						if (nmcd->uItemState & CDIS_FOCUS)
 							bg = (HBRUSH)(COLOR_HIGHLIGHT+1);
 						else if (buddy)
 							bg = CreateSolidBrush (RGB(255,255,0));
 						else if (SendMessage (hWndList, LVM_GETNEXTITEM, -1, LVNI_ALL | LVNI_SELECTED) == iRow)
 							bg = (HBRUSH)(COLOR_INACTIVEBORDER+1);
 
-						ListView_GetSubItemRect (hWndList, iRow, 1, LVIR_BOUNDS, &rc2);*/
+						ListView_GetSubItemRect (hWndList, iRow, 1, LVIR_BOUNDS, &rc2);
 
-						/*	if (bg)
+							if (bg)
 							{
 								FillRect (nmcd->hdc, &rc2, bg);
 								DeleteObject (bg);
 							}
 							else
-								FillRect (nmcd->hdc, &rc2, (HBRUSH)(COLOR_WINDOW+1));*/
+								FillRect (nmcd->hdc, &rc2, (HBRUSH)(COLOR_WINDOW+1));
 
 						ListView_GetSubItemRect (hWndList, iRow, 1, LVIR_ICON, &rc);
 						pResult |= CDRF_SKIPDEFAULT;
@@ -2514,9 +2516,6 @@ VOID FillServerListView (NMLVDISPINFO *info)
 #if 1
 			IN_ADDR tmp;
 
-			//info->item.mask |= LVIF_IMAGE;
-			//info->item.iImage = 7 + server->cID;
-
 			tmp.S_un.S_addr = server->ip;
 
 			info->item.pszText[0] = _T('\0');
@@ -2536,8 +2535,6 @@ VOID FillServerListView (NMLVDISPINFO *info)
 			break;
 
 		case INFO_PLAYERS:
-			//_stprintf (buff, _T("%d / %d"), server->curClients, server->maxClients - server->reservedSlots);
-			//_tcscpy (info->item.pszText, buff);
 			StringCchPrintf (info->item.pszText, info->item.cchTextMax, _T("%d / %d"), server->curClients, server->maxClients - server->reservedSlots);
 			break;
 
@@ -2547,7 +2544,6 @@ VOID FillServerListView (NMLVDISPINFO *info)
 
 		case INFO_TIMELIMIT:
 			StringCchPrintf (info->item.pszText, info->item.cchTextMax, _T("%d"), server->timelimit);
-			//_tcscpy (info->item.pszText, buff);
 			break;
 
 		case INFO_GAMENAME:

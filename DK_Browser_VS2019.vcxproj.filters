@@ -43,103 +43,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="flags\bmp\ar.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\at.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\au.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\be.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\bg.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\bh.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\bo.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\br.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\bs.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\by.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\ca.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\ch.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\cl.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\cn.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\co.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="computer.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="flags\bmp\cs.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\cz.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\de.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\dk.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\do.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\ee.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\en.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\es.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\eu.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\fi.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\fr.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="freebsd.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\gb.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\gr.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\hr.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\hu.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\ic.bmp">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="icon1.ico">
@@ -160,112 +67,13 @@
     <None Include="icon6.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="flags\bmp\ie.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\il.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\ir.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\it.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\jp.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\kr.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\kz.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="linux.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\lt.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\lv.bmp">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="macos.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="flags\bmp\md.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\mk.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\mt.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\mx.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\my.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\n-a.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\nl.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\no.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\nz.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\pe.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\ph.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\pl.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\pt.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="quake2.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\ro.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\ru.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\se.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\si.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\sk.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\tr.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\tw.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\ua.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\uk.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\us.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="flags\bmp\vn.bmp">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="windows.ico">

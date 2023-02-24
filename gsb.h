@@ -52,7 +52,6 @@ typedef struct _SERVERINFO
 	_TCHAR		szGameMode[64];
 	int			timelimit;
 	int			reservedSlots;
-	int			cID;
 	_TCHAR		infostrings[1536];
 } SERVERINFO;
 

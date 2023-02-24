@@ -99,8 +99,6 @@ HINSTANCE hThisInstance;								// current instance
 HANDLE PingHandle = NULL;
 DWORD PingThreadID = 0;
 
-HIMAGELIST	hCountry;
-
 // Forward declarations of functions included in this code module:
 BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -437,8 +435,6 @@ BOOL InitListViewImageLists(HWND hWndListView)
 	// Create the full-sized icon image lists. 
 	hSmall = ImageList_Create(16, 14, ILC_COLOR32|ILC_MASK, 8, 0);
 
-	hCountry = ImageList_Create(18, 14, ILC_COLOR32, 65, 0);
-
 	hSmall2 = ImageList_Create(16, 14, ILC_COLOR32, 1, 0);
 
 	ImageList_SetBkColor (hSmall, CLR_NONE);
@@ -475,14 +471,6 @@ BOOL InitListViewImageLists(HWND hWndListView)
 	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_MACOSX));
 	ImageList_AddIcon(hSmall, hiconItem);
 	DestroyIcon(hiconItem);
-
-	for (i = IDB_BITMAP0; i <= IDB_BITMAP64; i++)
-	{
-		HBITMAP	hBmp;
-		hBmp = LoadBitmap (hThisInstance, MAKEINTRESOURCE(i));
-		ImageList_Add (hCountry, hBmp, NULL);
-		DeleteObject (hBmp);
-	}
 
 	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_ICON1));
 	ImageList_AddIcon(hSmall2, hiconItem);
@@ -2248,7 +2236,6 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 							FillRect (nmcd->hdc, &rc2, (HBRUSH)(COLOR_WINDOW+1));
 
 						ListView_GetSubItemRect (hWndList, iRow, 1, LVIR_ICON, &rc);
-						ImageList_DrawEx (hCountry, server->cID, nmcd->hdc, rc.left + 1, rc.top + 1, 18, 12, CLR_NONE, CLR_NONE, ILD_NORMAL);
 						pResult |= CDRF_DOERASE | CDRF_NOTIFYPOSTPAINT;
 
 						tmp.S_un.S_addr = server->ip;
@@ -2397,7 +2384,6 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 								FillRect (nmcd->hdc, &rc2, (HBRUSH)(COLOR_WINDOW+1));*/
 
 						ListView_GetSubItemRect (hWndList, iRow, 1, LVIR_ICON, &rc);
-						//						ImageList_DrawEx (hCountry, server->cID, nmcd->hdc, rc.left + 1, rc.top + 1, 18, 12, CLR_NONE, CLR_NONE, ILD_NORMAL);
 						pResult |= CDRF_SKIPDEFAULT;
 
 						tmp.S_un.S_addr = server->ip;

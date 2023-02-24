@@ -58,7 +58,7 @@ do { \
 #define WM_TRAYICON						(WM_USER + 1)
 
 HMENU		hTrayMenu;	// tray icon menu
-PNOTIFYICONDATAW	notifyIconData;	// data for tray icon
+PNOTIFYICONDATA	notifyIconData;	// data for tray icon
 
 _TCHAR		q2Path[MAX_PATH];
 _TCHAR		q2Exe[MAX_PATH];
@@ -805,7 +805,11 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 	char *serverInfo[INFO_MAX];
 	char *next_token;
 
+#ifdef UNICODE
 	mbstowcs(server->infostrings, (_TCHAR *)(recvBuff + 10), tsizeof(server->infostrings) - 1);
+#else
+	strncpy(server->infostrings, (_TCHAR *)(recvBuff + 10), tsizeof(server->infostrings) - 1);
+#endif
 	now = timeGetTime();
 
 	server->gotResponse = TRUE;
@@ -2580,9 +2584,9 @@ VOID FillServerListView (NMLVDISPINFO *info)
 
 static void WndInitNotifyIconData (void)
 {
-	notifyIconData = (PNOTIFYICONDATAW)calloc(1, sizeof(NOTIFYICONDATAW));
+	notifyIconData = (PNOTIFYICONDATA)calloc(1, sizeof(NOTIFYICONDATA));
 	memset (notifyIconData, 0, sizeof(*notifyIconData));
-	notifyIconData->cbSize = sizeof(NOTIFYICONDATAW);
+	notifyIconData->cbSize = sizeof(NOTIFYICONDATA);
 	notifyIconData->hWnd = hwndMain;
 	notifyIconData->uID = ID_TRAY_ICON;
 	notifyIconData->uFlags = (NIF_ICON | NIF_MESSAGE | NIF_TIP);

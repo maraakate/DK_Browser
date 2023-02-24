@@ -126,7 +126,7 @@ const column_t	columns[] =
 #define QUERY_STYLE	2
 #define GAME_NAME _T("Daikatana")
 #define DEFAULT_EXECUTABLE_NAME _T("daikatana.exe")
-#define GAME_REQUEST_PACKET "\xFF\xFF\xFF\xFF" "status\n"
+#define GAME_REQUEST_PACKET "\xFF\xFF\xFF\xFF" "status"
 #define QUERY_RESPONSE_HEADER_LEN	12
 #define QUERY_RESPONSE_SERVER_LEN	6
 #ifdef LAUNCH_FROM_CONFIG

@@ -51,6 +51,14 @@ do { \
 	(dst)[(len)] = 0; \
 } while (0)
 
+#define ID_TRAY_ICON						5500
+#define ID_TRAY_RESTORE_CONTEXT_MENU_ITEM	3500
+#define ID_TRAY_QUIT_CONTEXT_MENU_ITEM		3501
+#define WM_TRAYICON						(WM_USER + 1)
+
+HMENU		hTrayMenu;	// tray icon menu
+PNOTIFYICONDATAW	notifyIconData;	// data for tray icon
+
 _TCHAR		q2Path[MAX_PATH];
 _TCHAR		q2Exe[MAX_PATH];
 _TCHAR		*q2Buddies;
@@ -98,6 +106,7 @@ LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK Proxy(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 void UpdatePlayerList (VOID);
+static void WndInitNotifyIconData (void);
 
 int numServers = 0;
 
@@ -967,6 +976,10 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 	}
 
 	len = _tcslen(server->szGameDate)-1;
+#ifdef _UNICODE
+	if (len >= (sizeof(server->szGameDate) / sizeof(*server->szGameDate)) - 1)
+		len = (sizeof(server->szGameDate) / sizeof(*server->szGameDate)) - 1;
+#endif
 	server->szGameDate[len] = _T('\0');
 
 	free (rLine);
@@ -1962,6 +1975,8 @@ VOID InitMainDialog (HWND hWnd)
 
 	SetWindowText (hwndMain, APP_NAME);
 
+	WndInitNotifyIconData();
+
 	ShowWindow (hwndMain, SW_SHOWNORMAL);
 	UpdateWindow (hwndMain);
 	UpdateServers ();
@@ -2530,6 +2545,33 @@ VOID FillServerListView (NMLVDISPINFO *info)
 	}
 }
 
+static void WndInitNotifyIconData (void)
+{
+	notifyIconData = (PNOTIFYICONDATAW)calloc(1, sizeof(NOTIFYICONDATAW));
+	memset (notifyIconData, 0, sizeof(*notifyIconData));
+	notifyIconData->cbSize = sizeof(NOTIFYICONDATAW);
+	notifyIconData->hWnd = hwndMain;
+	notifyIconData->uID = ID_TRAY_ICON;
+	notifyIconData->uFlags = (NIF_ICON | NIF_MESSAGE | NIF_TIP);
+	notifyIconData->uCallbackMessage = WM_TRAYICON;
+	notifyIconData->hIcon = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_COMP));
+	_tcscpy(notifyIconData->szTip, TEXT("Daikatana Server Browser"));
+}
+
+static void WndMinToTray (BOOL minimize)
+{
+	if (minimize)
+	{
+		Shell_NotifyIcon(NIM_ADD, notifyIconData);
+		ShowWindow (hwndMain, SW_HIDE);
+	}
+	else
+	{
+		Shell_NotifyIcon(NIM_DELETE, notifyIconData);
+		ShowWindow(hwndMain, SW_SHOW);
+	}
+}
+
 //
 //  FUNCTION: WndProc(HWND, unsigned, WORD, LONG)
 //
@@ -2551,11 +2593,46 @@ LRESULT CALLBACK WndProcMain(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 		case WM_INITDIALOG:
 			hwndMain = hWnd;
 			InitMainDialog (hWnd);
+			hTrayMenu = CreatePopupMenu();
+			AppendMenu (hTrayMenu, MF_STRING, ID_TRAY_RESTORE_CONTEXT_MENU_ITEM, TEXT("Restore"));
+			AppendMenu (hTrayMenu, MF_SEPARATOR, 0, 0);
+			AppendMenu (hTrayMenu, MF_STRING, ID_TRAY_QUIT_CONTEXT_MENU_ITEM, TEXT("Quit"));
 			return TRUE;
 		case WM_SIZE:
 			return ResizeWindow (wParam, lParam);
 		case WM_GETMINMAXINFO:
 			return HandleMinMax (wParam, lParam);
+		case WM_SYSCOMMAND:
+			switch (wParam & 0xfff0)
+			{
+				case SC_MINIMIZE:
+					WndMinToTray (TRUE);
+					return TRUE;
+			}
+			break;
+		case WM_TRAYICON:
+			if (lParam == WM_LBUTTONDBLCLK)
+			{
+				WndMinToTray (FALSE);
+			}
+			else if (lParam == WM_RBUTTONUP)
+			{
+				UINT	itemClicked;
+				POINT	cursorPoint;
+				GetCursorPos (&cursorPoint);
+				SetForegroundWindow(hwndMain);
+				itemClicked = TrackPopupMenu (hTrayMenu, TPM_RETURNCMD | TPM_NONOTIFY, cursorPoint.x, cursorPoint.y, 0, hwndMain, NULL);
+				if (itemClicked == ID_TRAY_RESTORE_CONTEXT_MENU_ITEM)
+				{
+					WndMinToTray (FALSE);
+				}
+				else if (itemClicked == ID_TRAY_QUIT_CONTEXT_MENU_ITEM)
+				{
+					SaveStuff();
+					PostQuitMessage(0);
+				}
+			}
+			break;
 		case WM_COMMAND:
 			wmId    = LOWORD(wParam); 
 			wmEvent = HIWORD(wParam); 
@@ -2722,7 +2799,11 @@ void GetResultsFromProxyDialog (HWND hDlg)
 	UpdateWindow (hWndList);
 	UpdateWindow (hWndPlayerList);
 
-	if (q2Path[0] && q2Path[_tcslen(q2Path)-1] != '\\')
+#ifdef _UNICODE
+	if (q2Path[0] && (q2Path[(sizeof(q2Path) / sizeof(*q2Path)) - 1] != '\\'))
+#else
+	if (q2Path[0] && (q2Path[_tcslen(q2Path)-1] != '\\'))
+#endif
 		StringCbCat (q2Path, sizeof(q2Path), _T("\\"));
 }
 

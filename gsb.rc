@@ -58,7 +58,7 @@ END
 
 IDD_MAIN DIALOGEX 0, 0, 457, 258
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
-CAPTION "Quake II Server Browser"
+CAPTION "Daikatana Server Browser"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     GROUPBOX        "Servers",IDC_SERVERFRAME,0,0,456,140
@@ -206,8 +206,8 @@ IDI_ICON6               ICON                    "icon6.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,12
- PRODUCTVERSION 1,0,0,12
+ FILEVERSION 1,0,0,13
+ PRODUCTVERSION 1,0,0,13
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -225,11 +225,11 @@ BEGIN
             VALUE "Comments", "daikatana server browser"
             VALUE "CompanyName", "maraakate.org"
             VALUE "FileDescription", "daikatana server browser"
-            VALUE "FileVersion", "1, 0, 0, 12"
-            VALUE "InternalName", "gsb"
+            VALUE "FileVersion", "1, 0, 0, 13"
+            VALUE "InternalName", "dksb"
             VALUE "LegalCopyright", "Copyright (C) 2021 maraakate.org. Additional copyright (C) 2001-2007 r1ch.net"
             VALUE "ProductName", "daikatana server browser"
-            VALUE "ProductVersion", "1, 0, 0, 12"
+            VALUE "ProductVersion", "1, 0, 0, 13"
         END
     END
     BLOCK "VarFileInfo"

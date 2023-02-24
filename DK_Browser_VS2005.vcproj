@@ -396,111 +396,7 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath=".\flags\bmp\ar.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\at.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\au.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\be.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\bg.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\bh.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\bo.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\br.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\bs.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\by.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\ca.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\ch.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\cl.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\cn.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\co.bmp"
-				>
-			</File>
-			<File
 				RelativePath=".\computer.ico"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\cs.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\cz.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\de.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\dk.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\do.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\ee.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\en.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\es.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\eu.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\fi.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\fr.bmp"
 				>
 			</File>
 			<File
@@ -508,27 +404,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\flags\bmp\gb.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\gr.bmp"
-				>
-			</File>
-			<File
 				RelativePath=".\gsb.rc"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\hr.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\hu.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\ic.bmp"
 				>
 			</File>
 			<File
@@ -556,43 +432,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\flags\bmp\ie.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\il.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\ir.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\it.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\jp.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\kr.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\kz.bmp"
-				>
-			</File>
-			<File
 				RelativePath=".\linux.ico"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\lt.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\lv.bmp"
 				>
 			</File>
 			<File
@@ -600,103 +440,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\flags\bmp\md.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\mk.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\mt.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\mx.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\my.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\n-a.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\nl.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\no.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\nz.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\pe.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\ph.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\pl.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\pt.bmp"
-				>
-			</File>
-			<File
 				RelativePath=".\quake2.ico"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\ro.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\ru.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\se.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\si.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\sk.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\tr.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\tw.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\ua.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\uk.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\us.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\flags\bmp\vn.bmp"
 				>
 			</File>
 			<File

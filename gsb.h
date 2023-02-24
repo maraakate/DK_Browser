@@ -82,13 +82,13 @@ typedef enum
 
 typedef struct
 {
-	const char	*key;
+	const char *key;
 	int			mapping;
 } infokey_t;
 
 typedef struct
 {
-	_TCHAR		*columnTitle;
+	_TCHAR *columnTitle;
 	int			relWidth;
 	int			mapping;
 	UINT_PTR			fofs;
@@ -110,7 +110,7 @@ const infokey_t	infokey[] =
 	{"version", INFO_VERSION},
 };
 
-const column_t	columns[] = 
+const column_t	columns[] =
 {
 	{_T("Host Name"), 30, INFO_HOSTNAME, FOFS(szHostName), CSORT_DEFAULT, 1},
 	{_T("IP Address"), 20, INFO_IPADDRESS, FOFS(ip), CSORT_NUMERIC, 0},
@@ -119,7 +119,7 @@ const column_t	columns[] =
 	{_T("Game Mode"), 10, INFO_GAMEMODE, FOFS(szGameMode), CSORT_DEFAULT, 1},
 	{_T("Game Date"), 10, INFO_GAMEDATE, FOFS(szGameDate), CSORT_DEFAULT, 1},
 	{_T("Ping"), 10, INFO_PING, FOFS (ping), CSORT_NUMERIC, 1},
-};	
+};
 
 #define	APP_NAME _T("Daikatana Server Browser")
 #define	MASTER_SERVER _T("master.maraakate.org")

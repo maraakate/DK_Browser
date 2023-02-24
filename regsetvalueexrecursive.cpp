@@ -10,11 +10,11 @@ use of this software.
 
 Permission is granted to anyone to use this software for any purpose, including
 commercial applications, and to alter it and redistribute it freely, subject
-to the following restrictions: 
+to the following restrictions:
 
 1) The origin of this software must not be misrepresented; you must not claim
    that you wrote the original software. If you use this software in a product,
-	 an acknowledgment in the product documentation is requested but not required. 
+	 an acknowledgment in the product documentation is requested but not required.
 2) Altered source versions must be plainly marked as such, and must not be
    misrepresented as being the original software. Altered source is encouraged
 	 to be submitted back to the original author so it can be shared with the
@@ -30,17 +30,17 @@ Purpose:	Perform a reg set value ex but allow the value name to be a path
 #include <tchar.h>
 #include <commctrl.h>
 
-long RegSetValueExRecursive( HKEY hKey, LPCTSTR lpValueName, DWORD Reserved, DWORD dwType, CONST BYTE* lpData, DWORD cbData )
+long RegSetValueExRecursive(HKEY hKey, LPCTSTR lpValueName, DWORD Reserved, DWORD dwType, CONST BYTE *lpData, DWORD cbData)
 {
-	TCHAR szBuffer[ 256 ];
+	TCHAR szBuffer[256];
 
-	(void)lstrcpy( szBuffer, lpValueName );
+	(void)lstrcpy(szBuffer, lpValueName);
 
 	LPTSTR pszBuffer = szBuffer;
 	LPTSTR pszLast = szBuffer;
-	while( *pszBuffer )
+	while (*pszBuffer)
 	{
-		if( *pszBuffer == _T('\\') || *pszBuffer == _T('/') )
+		if (*pszBuffer == _T('\\') || *pszBuffer == _T('/'))
 		{
 			pszLast = pszBuffer;
 			lpValueName = pszLast + 1;
@@ -49,25 +49,25 @@ long RegSetValueExRecursive( HKEY hKey, LPCTSTR lpValueName, DWORD Reserved, DWO
 	}
 
 	bool m_bNeedToCloseKey = false;
-	if( pszLast != szBuffer )
+	if (pszLast != szBuffer)
 	{
 		*pszLast = _T('\000');
 		HKEY hkeyTemp;
-		long lRet = RegOpenKey( hKey, szBuffer, &hkeyTemp );
-		if( lRet != ERROR_SUCCESS )
+		long lRet = RegOpenKey(hKey, szBuffer, &hkeyTemp);
+		if (lRet != ERROR_SUCCESS)
 		{
-			lRet = RegCreateKey( hKey, szBuffer, &hkeyTemp );
-			if( lRet != ERROR_SUCCESS )
+			lRet = RegCreateKey(hKey, szBuffer, &hkeyTemp);
+			if (lRet != ERROR_SUCCESS)
 				return lRet;
 		}
 		hKey = hkeyTemp;
 		m_bNeedToCloseKey = true;
 	}
 
-	long lRet = RegSetValueEx( hKey, lpValueName, Reserved, dwType, lpData, cbData );
-	if( m_bNeedToCloseKey )
+	long lRet = RegSetValueEx(hKey, lpValueName, Reserved, dwType, lpData, cbData);
+	if (m_bNeedToCloseKey)
 	{
-		RegCloseKey( hKey );
+		RegCloseKey(hKey);
 	}
 	return lRet;
 }

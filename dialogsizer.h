@@ -9,11 +9,11 @@ use of this software.
 
 Permission is granted to anyone to use this software for any purpose, including
 commercial applications, and to alter it and redistribute it freely, subject
-to the following restrictions: 
+to the following restrictions:
 
 1) The origin of this software must not be misrepresented; you must not claim
    that you wrote the original software. If you use this software in a product,
-	 an acknowledgment in the product documentation is requested but not required. 
+	 an acknowledgment in the product documentation is requested but not required.
 2) Altered source versions must be plainly marked as such, and must not be
    misrepresented as being the original software. Altered source is encouraged
 	 to be submitted back to the original author so it can be shared with the
@@ -28,7 +28,7 @@ Purpose:	Main include file for sizeable dialogs API
 #define DIALOGSIZER_H
 
 #ifndef _INC_TCHAR
-	#include <tchar.h>
+#include <tchar.h>
 #endif	//	_INC_TCHAR
 
 //
@@ -52,8 +52,8 @@ typedef struct DialogSizerSizingItem	//	sdi
 //	Set a window as sizeable, passing the registry key and name to load/store the window
 //	position from and the sizing data for each control. hkRootSave and pcszName can both be NULL but the size/position won't then be saved.
 #ifndef CINTERFACE
-extern "C" BOOL DialogSizer_Set( HWND hwnd, const DialogSizerSizingItem *psd, BOOL bShowSizingGrip, SIZE *psizeMax );
+extern "C" BOOL DialogSizer_Set(HWND hwnd, const DialogSizerSizingItem * psd, BOOL bShowSizingGrip, SIZE * psizeMax);
 #else
-BOOL DialogSizer_Set( HWND hwnd, const DialogSizerSizingItem *psd, BOOL bShowSizingGrip, SIZE *psizeMax );
+BOOL DialogSizer_Set(HWND hwnd, const DialogSizerSizingItem *psd, BOOL bShowSizingGrip, SIZE *psizeMax);
 #endif
 #endif //DIALOGSIZER_H

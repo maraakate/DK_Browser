@@ -1,24 +1,24 @@
 /*
-    Daikatana Server Browser
-    Copyright (C) 2021  Frank Sapone (maraakate.org)
+	Daikatana Server Browser
+	Copyright (C) 2021  Frank Sapone (maraakate.org)
 
-    Based on the code of
-    Gloom Server Browser
-    Copyright (C) 2001-2007  Richard Stanway (www.r1ch.net)
+	Based on the code of
+	Gloom Server Browser
+	Copyright (C) 2001-2007  Richard Stanway (www.r1ch.net)
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 #include "gsb.h"
@@ -62,7 +62,7 @@ PNOTIFYICONDATAW	notifyIconData;	// data for tray icon
 
 _TCHAR		q2Path[MAX_PATH];
 _TCHAR		q2Exe[MAX_PATH];
-_TCHAR		*q2Buddies;
+_TCHAR *q2Buddies;
 int			q2PacketsPerSecond;
 
 DWORD		q2GoodPing, q2MediumPing;
@@ -74,7 +74,7 @@ typedef struct
 	_TCHAR	name[32];
 } playername_t;
 
-playername_t	*buddyList;
+playername_t *buddyList;
 
 
 int globalServers = 0;
@@ -117,7 +117,8 @@ static int lastSortOrder;
 void RequestHandler (void);
 
 
-typedef enum DKB_PROCESS_DPI_AWARENESS {
+typedef enum DKB_PROCESS_DPI_AWARENESS
+{
 	DKB_PROCESS_DPI_UNAWARE = 0,
 	DKB_PROCESS_SYSTEM_DPI_AWARE = 1,
 	DKB_PROCESS_PER_MONITOR_DPI_AWARE = 2
@@ -150,15 +151,15 @@ static void SetHighDPIMode (void)
 
 _TCHAR *lstrstr (CONST _TCHAR *str1, CONST _TCHAR *lowered_str2)
 {
-	_TCHAR	*ret;
-	_TCHAR	*lowered;
+	_TCHAR *ret;
+	_TCHAR *lowered;
 
 	lowered = _tcsdup (str1);
 	if (!lowered)
 	{
 		return NULL;
 	}
-	_tcslwr_s (lowered, _tcslen(lowered)+1);
+	_tcslwr_s (lowered, _tcslen(lowered) + 1);
 
 	ret = _tcsstr (lowered, lowered_str2);
 	free (lowered);
@@ -177,26 +178,26 @@ VOID StatusBar (LPCTSTR fmt, ...)
 	StringCbVPrintf (buff, sizeof(buff), fmt, va);
 	va_end (va);
 
-	SendMessage (hWndStatus, SB_SETTEXT, (WPARAM) 0, (LPARAM)buff);
+	SendMessage (hWndStatus, SB_SETTEXT, (WPARAM)0, (LPARAM)buff);
 }
 
 #ifdef LAUNCH_FROM_CONFIG
 _TCHAR *HPIFindTADir (_TCHAR *Path)
 {
 	_TCHAR *TAdir;
-	WIN32_FIND_DATA FileData; 
-	HANDLE hSearch; 
+	WIN32_FIND_DATA FileData;
+	HANDLE hSearch;
 	_TCHAR myPath[MAX_PATH];
-	_TCHAR szNewPath[MAX_PATH]; 
-	_TCHAR	*pathPtr;
+	_TCHAR szNewPath[MAX_PATH];
+	_TCHAR *pathPtr;
 	SIZE_T		pathLen;
 
-	BOOL fFinished = FALSE; 
+	BOOL fFinished = FALSE;
 
 	StringCbCopy (myPath, sizeof(myPath), Path);
 	StringCbCat (myPath, sizeof(myPath), _T("*"));
 
-	hSearch = FindFirstFile (myPath, &FileData); 
+	hSearch = FindFirstFile (myPath, &FileData);
 
 	if (hSearch == INVALID_HANDLE_VALUE)
 		return NULL;
@@ -206,15 +207,15 @@ _TCHAR *HPIFindTADir (_TCHAR *Path)
 	pathLen = _tcslen (szNewPath);
 	pathPtr = szNewPath + pathLen;
 
-	while (!fFinished) 
-	{ 
-		if (_tcslen (FileData.cFileName) + pathLen + 1 > tsizeof(szNewPath)-1)
+	while (!fFinished)
+	{
+		if (_tcslen (FileData.cFileName) + pathLen + 1 > tsizeof(szNewPath) - 1)
 		{
 			FindClose(hSearch);
 			return NULL;
 		}
 
-		if (FileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY && _tcscmp (FileData.cFileName, _T(".")) && 
+		if (FileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY && _tcscmp (FileData.cFileName, _T(".")) &&
 			_tcscmp (FileData.cFileName, _T("..")))
 		{
 			StringCbCopy (pathPtr, sizeof(pathPtr), FileData.cFileName);
@@ -241,8 +242,8 @@ _TCHAR *HPIFindTADir (_TCHAR *Path)
 		}
 
 		if (!FindNextFile(hSearch, &FileData))
-			fFinished = TRUE; 
-	} 
+			fFinished = TRUE;
+	}
 
 	// Close the search handle. 
 	FindClose(hSearch);
@@ -256,15 +257,15 @@ void SaveStuff(void)
 	HKEY			hk;
 	WINDOWPLACEMENT	winPlacement;
 	int				temp;
-	
+
 	RegCreateKeyEx  (HKEY_CURRENT_USER, _T("SOFTWARE\\r1ch.net\\") APP_NAME, 0, NULL, 0, KEY_WRITE, NULL, &hk, &result);
 	if (!(RegOpenKeyEx (HKEY_CURRENT_USER, _T("SOFTWARE\\r1ch.net\\") APP_NAME, 0, KEY_WRITE, &hk)))
 	{
-		RegSetValueEx (hk, GAME_NAME _T(" Directory"), 0, REG_SZ, (const BYTE *)q2Path, (_tcslen(q2Path)+1) * sizeof(_TCHAR));
-		RegSetValueEx (hk, GAME_NAME _T(" Executable"), 0, REG_SZ, (const BYTE *)q2Exe, (_tcslen(q2Exe)+1) * sizeof(_TCHAR));
+		RegSetValueEx (hk, GAME_NAME _T(" Directory"), 0, REG_SZ, (const BYTE *)q2Path, (_tcslen(q2Path) + 1) * sizeof(_TCHAR));
+		RegSetValueEx (hk, GAME_NAME _T(" Executable"), 0, REG_SZ, (const BYTE *)q2Exe, (_tcslen(q2Exe) + 1) * sizeof(_TCHAR));
 
 		if (q2Buddies[0])
-			RegSetValueEx (hk, _T("Buddy List"), 0, REG_SZ, (const BYTE *)q2Buddies, (_tcslen(q2Buddies)+1) * sizeof(_TCHAR));
+			RegSetValueEx (hk, _T("Buddy List"), 0, REG_SZ, (const BYTE *)q2Buddies, (_tcslen(q2Buddies) + 1) * sizeof(_TCHAR));
 		else
 			RegSetValueEx (hk, _T("Buddy List"), 0, REG_SZ, (const BYTE *)_T(""), 1 * sizeof(_TCHAR));
 
@@ -303,7 +304,7 @@ void SaveStuff(void)
 	WSACleanup();
 }
 
-void RunQ2 (NMITEMACTIVATE *info)
+void LaunchDK (NMITEMACTIVATE *info)
 {
 	HCURSOR		hcSave;
 	LVITEM		pitem;
@@ -337,9 +338,9 @@ void RunQ2 (NMITEMACTIVATE *info)
 	{
 		int drive;
 
-		for (drive = 3; drive <= 26; drive++ )
+		for (drive = 3; drive <= 26; drive++)
 		{
-			_TCHAR	*temp;
+			_TCHAR *temp;
 			_TCHAR	dirtogo[4];
 			StringCbPrintf (dirtogo, sizeof(dirtogo), _T("%c:\\"), drive + 'A' - 1);
 			if (GetDriveType (dirtogo) == DRIVE_FIXED)
@@ -360,9 +361,9 @@ void RunQ2 (NMITEMACTIVATE *info)
 		struct in_addr tmp;
 		tmp.S_un.S_addr = servers[index].ip;
 #ifdef _UNICODE
-		StringCbPrintf (Server, sizeof(Server), _T("%S:%d"), inet_ntoa(tmp), servers[index].port); 
+		StringCbPrintf (Server, sizeof(Server), _T("%S:%d"), inet_ntoa(tmp), servers[index].port);
 #else
-		StringCbPrintf (Server, sizeof(Server), _T("%s:%d"), inet_ntoa(tmp), servers[index].port); 
+		StringCbPrintf (Server, sizeof(Server), _T("%s:%d"), inet_ntoa(tmp), servers[index].port);
 #endif
 	}
 
@@ -380,7 +381,7 @@ void RunQ2 (NMITEMACTIVATE *info)
 	else
 #endif
 	{
-		STARTUPINFO			s; 
+		STARTUPINFO			s;
 		_TCHAR				q2buff[MAX_PATH];
 		PROCESS_INFORMATION	p;
 		_TCHAR				cmdLine[512];
@@ -424,7 +425,7 @@ void RunQ2 (NMITEMACTIVATE *info)
 	}
 }
 
-BOOL InitListViewImageLists(HWND hWndListView) 
+BOOL InitListViewImageLists(HWND hWndListView)
 {
 	int	i;
 
@@ -434,45 +435,45 @@ BOOL InitListViewImageLists(HWND hWndListView)
 	HIMAGELIST hSmall2;   // image list for other views 
 
 	// Create the full-sized icon image lists. 
-	hSmall = ImageList_Create(16, 14, ILC_COLOR32, 8,0); 
+	hSmall = ImageList_Create(16, 14, ILC_COLOR32, 8, 0);
 
-	hCountry = ImageList_Create(18, 14, ILC_COLOR32, 65, 0); 
+	hCountry = ImageList_Create(18, 14, ILC_COLOR32, 65, 0);
 
-	hSmall2 = ImageList_Create(16, 14, ILC_COLOR32, 1, 0); 
+	hSmall2 = ImageList_Create(16, 14, ILC_COLOR32, 1, 0);
 
 	ImageList_SetBkColor (hSmall, CLR_NONE);
 
 	// Add an icon to each image list.  
-	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_SERVER)); 
-	ImageList_AddIcon (hSmall, hiconItem); 
+	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_SERVER));
+	ImageList_AddIcon (hSmall, hiconItem);
 	DestroyIcon(hiconItem);
 
-	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_ICON4)); 
-	ImageList_AddIcon(hSmall, hiconItem); 
+	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_ICON4));
+	ImageList_AddIcon(hSmall, hiconItem);
 	DestroyIcon(hiconItem);
 
-	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_ICON6)); 
-	ImageList_AddIcon(hSmall, hiconItem); 
+	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_ICON6));
+	ImageList_AddIcon(hSmall, hiconItem);
 	DestroyIcon(hiconItem);
 
-	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_ICON5)); 
-	ImageList_AddIcon(hSmall, hiconItem); 
+	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_ICON5));
+	ImageList_AddIcon(hSmall, hiconItem);
 	DestroyIcon(hiconItem);
 
-	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_LINUX)); 
-	ImageList_AddIcon(hSmall, hiconItem); 
-	DestroyIcon(hiconItem); 
-
-	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_WIN32)); 
-	ImageList_AddIcon(hSmall, hiconItem); 
+	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_LINUX));
+	ImageList_AddIcon(hSmall, hiconItem);
 	DestroyIcon(hiconItem);
 
-	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_FREEBSD)); 
-	ImageList_AddIcon(hSmall, hiconItem); 
+	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_WIN32));
+	ImageList_AddIcon(hSmall, hiconItem);
 	DestroyIcon(hiconItem);
 
-	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_MACOSX)); 
-	ImageList_AddIcon(hSmall, hiconItem); 
+	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_FREEBSD));
+	ImageList_AddIcon(hSmall, hiconItem);
+	DestroyIcon(hiconItem);
+
+	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_MACOSX));
+	ImageList_AddIcon(hSmall, hiconItem);
 	DestroyIcon(hiconItem);
 
 	for (i = IDB_BITMAP0; i <= IDB_BITMAP64; i++)
@@ -483,13 +484,13 @@ BOOL InitListViewImageLists(HWND hWndListView)
 		DeleteObject (hBmp);
 	}
 
-	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_ICON1)); 
-	ImageList_AddIcon(hSmall2, hiconItem); 
-	DestroyIcon(hiconItem); 
- 
+	hiconItem = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_ICON1));
+	ImageList_AddIcon(hSmall2, hiconItem);
+	DestroyIcon(hiconItem);
+
 	/*********************************************************
 	Usually you have multiple icons; therefore, the previous
-	four lines of code can be inside a loop. The following code 
+	four lines of code can be inside a loop. The following code
 	shows such a loop. The icons are defined in the application's
 	header file as resources, which are numbered consecutively
 	starting with IDS_FIRSTICON. The number of icons is
@@ -509,14 +510,14 @@ BOOL InitListViewImageLists(HWND hWndListView)
 	//ListView_SetImageList(hwndLV, hLarge, LVSIL_NORMAL); 
 	ListView_SetImageList(hWndListView, hSmall, LVSIL_SMALL);
 	ListView_SetImageList(hWndPlayerList, hSmall2, LVSIL_SMALL);
-	return TRUE; 
+	return TRUE;
 }
 
 int CALLBACK CompareFunc (LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
 	int				index;
-	const column_t	*column;
-	SERVERINFO		*a, *b;
+	const column_t *column;
+	SERVERINFO *a, *b;
 	int				inverted;
 
 	index = (int)lParamSort;
@@ -551,7 +552,7 @@ int CALLBACK CompareFunc (LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 
 int CALLBACK CompareFunc2 (LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
-	PLAYERINFO	*a, *b;
+	PLAYERINFO *a, *b;
 
 	a = (PLAYERINFO *)lParam1;
 	b = (PLAYERINFO *)lParam2;
@@ -582,14 +583,14 @@ int CALLBACK CompareFunc2 (LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 int GetImageForVersion (_TCHAR *version)
 {
 	int		image;
-	_TCHAR	*lowered;
+	_TCHAR *lowered;
 
 	lowered = _tcsdup (version);
 	if (!lowered)
 	{
 		return -1;
 	}
-	_tcslwr_s (lowered, _tcslen(lowered)+1);
+	_tcslwr_s (lowered, _tcslen(lowered) + 1);
 
 	if (_tcsstr (lowered, _T("linux")))
 		image = 4;
@@ -608,7 +609,7 @@ int GetImageForVersion (_TCHAR *version)
 }
 
 HWND LV_CreateListView (HWND hWndParent, HINSTANCE hInst, int NumServers,
-						SERVERINFO *pServer)
+	SERVERINFO *pServer)
 {
 	HICON		icon;
 	HWND		hWndList;      // handle to the list view window
@@ -617,7 +618,7 @@ HWND LV_CreateListView (HWND hWndParent, HINSTANCE hInst, int NumServers,
 	LVCOLUMN	lvC;      // list view column structure
 	int			iWidth;         // column width
 	int			width[6];
-	_TCHAR		*columnTitle[6];
+	_TCHAR *columnTitle[6];
 
 	hWndList = GetDlgItem (hwndMain, IDC_SERVERLIST);
 	GetClientRect(hWndList, &rcl);
@@ -637,7 +638,7 @@ HWND LV_CreateListView (HWND hWndParent, HINSTANCE hInst, int NumServers,
 	columnTitle[4] = "DLL Date";
 	columnTitle[5] = "Ping";*/
 
-	SendMessage (hWndList, LVM_SETEXTENDEDLISTVIEWSTYLE, (WPARAM)0, (LPARAM) LVS_EX_SUBITEMIMAGES | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER );
+	SendMessage (hWndList, LVM_SETEXTENDEDLISTVIEWSTYLE, (WPARAM)0, (LPARAM)LVS_EX_SUBITEMIMAGES | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER);
 
 	lvC.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM | LVCF_ORDER;
 	lvC.fmt = LVCFMT_LEFT;
@@ -660,7 +661,7 @@ HWND LV_CreateListView (HWND hWndParent, HINSTANCE hInst, int NumServers,
 	}
 
 	hWndPlayerList = GetDlgItem (hwndMain, IDC_PLAYERS);
-	SendMessage (hWndPlayerList, LVM_SETEXTENDEDLISTVIEWSTYLE, (WPARAM)0, (LPARAM) LVS_EX_SUBITEMIMAGES | LVS_EX_FULLROWSELECT);
+	SendMessage (hWndPlayerList, LVM_SETEXTENDEDLISTVIEWSTYLE, (WPARAM)0, (LPARAM)LVS_EX_SUBITEMIMAGES | LVS_EX_FULLROWSELECT);
 
 	GetClientRect(hWndPlayerList, &rcl);
 	iWidth = (rcl.right - rcl.left);
@@ -687,41 +688,41 @@ HWND LV_CreateListView (HWND hWndParent, HINSTANCE hInst, int NumServers,
 	GetClientRect(hwndMain, &rcl);
 	iWidth = (rcl.right - rcl.left);
 
-	hWndStatus = CreateWindow (STATUSCLASSNAME, _T(""), WS_CHILD | WS_VISIBLE, 0, 0, iWidth, 0,  hwndMain, (HMENU)NULL, hInst, 0);
+	hWndStatus = CreateWindow (STATUSCLASSNAME, _T(""), WS_CHILD | WS_VISIBLE, 0, 0, iWidth, 0, hwndMain, (HMENU)NULL, hInst, 0);
 
 	width[0] = 40;
 	width[1] = 15;
 	width[2] = 15;
 
-	for (index =0; index < 3; index++)
+	for (index = 0; index < 3; index++)
 	{
 		if (index)
-			width[index] = (int)(iWidth * (width[index] / 70.0f)) + width[index-1];
+			width[index] = (int)(iWidth * (width[index] / 70.0f)) + width[index - 1];
 		else
 			width[index] = (int)(iWidth * (width[index] / 70.0f));
 	}
 
 	// Tell the status bar to create the window parts. 
-	SendMessage(hWndStatus, SB_SETPARTS, (WPARAM) 3, 
-		(LPARAM) width);
+	SendMessage(hWndStatus, SB_SETPARTS, (WPARAM)3,
+		(LPARAM)width);
 
 	SetWindowLongPtr (hWndStatus, GWL_ID, IDC_STATUSBAR);
 
 	icon = (HICON)LoadImage(hThisInstance, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 16, 14, LR_DEFAULTCOLOR);
-	SendMessage(hWndStatus, SB_SETICON, (WPARAM)(INT) 1, 
+	SendMessage(hWndStatus, SB_SETICON, (WPARAM)(INT)1,
 		(LPARAM)icon);
 
 	icon = (HICON)LoadImage(hThisInstance, MAKEINTRESOURCE(IDI_ICON2), IMAGE_ICON, 16, 14, LR_DEFAULTCOLOR);
-	SendMessage(hWndStatus, SB_SETICON, (WPARAM)(INT) 2, 
+	SendMessage(hWndStatus, SB_SETICON, (WPARAM)(INT)2,
 		(LPARAM)icon);
 
 	icon = (HICON)LoadImage(hThisInstance, MAKEINTRESOURCE(IDI_ICON3), IMAGE_ICON, 14, 14, LR_DEFAULTCOLOR);
-	SendMessage(hWndStatus, SB_SETICON, (WPARAM)(INT) 0, 
+	SendMessage(hWndStatus, SB_SETICON, (WPARAM)(INT)0,
 		(LPARAM)icon);
 
 	StatusBar (_T("Updating Server List..."));
-	SendMessage (hWndStatus, SB_SETTEXT, (WPARAM) 1, (LPARAM) _T("0 Players"));
-	SendMessage (hWndStatus, SB_SETTEXT, (WPARAM) 2, (LPARAM) _T("0 Servers"));
+	SendMessage (hWndStatus, SB_SETTEXT, (WPARAM)1, (LPARAM)_T("0 Players"));
+	SendMessage (hWndStatus, SB_SETTEXT, (WPARAM)2, (LPARAM)_T("0 Servers"));
 
 	InitListViewImageLists (hWndList);
 
@@ -733,7 +734,7 @@ char *GetLine (char **contents, int *len)
 	int		num;
 	int		i;
 	char	line[2048];
-	char	*ret;
+	char *ret;
 
 	num = 0;
 	line[0] = '\0';
@@ -777,10 +778,10 @@ VOID UpdateInfoCounts (VOID)
 	_TCHAR	buff[512];
 
 	StringCbPrintf (buff, sizeof(buff), _T("%d Player%s"), globalPlayers, globalPlayers != 1 ? _T("s") : _T(""));
-	SendMessage (hWndStatus, SB_SETTEXT, (WPARAM) 1, (LPARAM)buff);
+	SendMessage (hWndStatus, SB_SETTEXT, (WPARAM)1, (LPARAM)buff);
 
 	StringCbPrintf (buff, sizeof(buff), _T("%d Server%s"), globalServers, globalServers != 1 ? _T("s") : _T(""));
-	SendMessage (hWndStatus, SB_SETTEXT, (WPARAM) 2, (LPARAM)buff);
+	SendMessage (hWndStatus, SB_SETTEXT, (WPARAM)2, (LPARAM)buff);
 }
 
 SOCKET				querySocket;
@@ -799,10 +800,10 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 	int			players;
 	int			i;
 	SIZE_T len = 0;
-	char		*token, *seps, *p, *rLine;
+	char *token, *seps, *p, *rLine;
 	LVITEM		lvI;
-	char		*serverInfo[INFO_MAX];
-	char		*next_token;
+	char *serverInfo[INFO_MAX];
+	char *next_token;
 
 	mbstowcs(server->infostrings, (_TCHAR *)(recvBuff + 10), tsizeof(server->infostrings) - 1);
 	now = timeGetTime();
@@ -833,7 +834,7 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 
 	/* Establish string and get the first token: */
 	token = strtok_s (rLine, seps, &next_token);
-	while( token != NULL )
+	while (token != NULL)
 	{
 		StringCbCopyA (lastToken, sizeof(lastToken), token);
 
@@ -847,7 +848,7 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 				serverInfo[infokey[i].mapping] = token;
 		}
 
-		
+
 		token = strtok_s (NULL, seps, &next_token);
 	}
 
@@ -868,36 +869,36 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 
 	if (serverInfo[INFO_MAP_NAME])
 #ifdef _UNICODE
-		MultiByteToWideChar (CP_ACP, 0, serverInfo[INFO_MAP_NAME], -1, server->szMapName, tsizeof(server->szMapName)-1);
+		MultiByteToWideChar (CP_ACP, 0, serverInfo[INFO_MAP_NAME], -1, server->szMapName, tsizeof(server->szMapName) - 1);
 #else
-		Q_strncpy (server->szMapName, serverInfo[INFO_MAP_NAME], sizeof(server->szMapName)-1);
+		Q_strncpy (server->szMapName, serverInfo[INFO_MAP_NAME], sizeof(server->szMapName) - 1);
 #endif
 	else
 		StringCbCopy (server->szMapName, sizeof(server->szMapName), _T("?"));
 
 	if (serverInfo[INFO_GAMENAME] && serverInfo[INFO_GAMENAME][0])
 #ifdef _UNICODE
-		MultiByteToWideChar (CP_ACP, 0, serverInfo[INFO_GAMENAME], -1, server->szGameName, tsizeof(server->szGameName)-1);
+		MultiByteToWideChar (CP_ACP, 0, serverInfo[INFO_GAMENAME], -1, server->szGameName, tsizeof(server->szGameName) - 1);
 #else
-		Q_strncpy (server->szGameName, serverInfo[INFO_MAP_NAME], sizeof(server->szGameName)-1);
+		Q_strncpy (server->szGameName, serverInfo[INFO_MAP_NAME], sizeof(server->szGameName) - 1);
 #endif
 	else
 		StringCbCopy (server->szGameName, sizeof(server->szGameName), _T("default"));
 
 	if (serverInfo[INFO_GAMEMODE] && serverInfo[INFO_GAMEMODE][0])
 #ifdef _UNICODE
-		MultiByteToWideChar (CP_ACP, 0, serverInfo[INFO_GAMEMODE], -1, server->szGameMode, tsizeof(server->szGameMode)-1);
+		MultiByteToWideChar (CP_ACP, 0, serverInfo[INFO_GAMEMODE], -1, server->szGameMode, tsizeof(server->szGameMode) - 1);
 #else
-		Q_strncpy (server->szGameMode, serverInfo[INFO_GAMEMODE], sizeof(server->szGameMode)-1);
+		Q_strncpy (server->szGameMode, serverInfo[INFO_GAMEMODE], sizeof(server->szGameMode) - 1);
 #endif
 	else
 		StringCbCopy (server->szGameMode, sizeof(server->szGameMode), _T("default"));
 
 	if (serverInfo[INFO_VERSION])
 #ifdef _UNICODE
-		MultiByteToWideChar (CP_ACP, 0, serverInfo[INFO_VERSION], -1, server->szVersion, tsizeof(server->szVersion)-1);
+		MultiByteToWideChar (CP_ACP, 0, serverInfo[INFO_VERSION], -1, server->szVersion, tsizeof(server->szVersion) - 1);
 #else
-		Q_strncpy (server->szVersion, serverInfo[INFO_VERSION], sizeof(server->szVersion)-1);
+		Q_strncpy (server->szVersion, serverInfo[INFO_VERSION], sizeof(server->szVersion) - 1);
 #endif
 	else
 		StringCbCopy (server->szVersion, sizeof(server->szVersion), _T(""));
@@ -905,15 +906,15 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 	if (serverInfo[INFO_HOSTNAME])
 	{
 #if QUERY_STYLE == 2
-		_TCHAR	*p, *q;
+		_TCHAR *p, *q;
 		int		skip;
 		BOOL	found_ascii = FALSE;
 #endif
 
 #ifdef _UNICODE
-		MultiByteToWideChar (CP_ACP, 0, serverInfo[INFO_HOSTNAME], -1, server->szHostName, tsizeof(server->szHostName)-1);
+		MultiByteToWideChar (CP_ACP, 0, serverInfo[INFO_HOSTNAME], -1, server->szHostName, tsizeof(server->szHostName) - 1);
 #else
-		Q_strncpy (server->szHostName, serverInfo[INFO_HOSTNAME], sizeof(server->szHostName)-1);
+		Q_strncpy (server->szHostName, serverInfo[INFO_HOSTNAME], sizeof(server->szHostName) - 1);
 #endif
 
 #if QUERY_STYLE == 2
@@ -948,23 +949,23 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 
 	if (serverInfo[INFO_GAMEDATE])
 	{
-		_TCHAR	*p;
+		_TCHAR *p;
 		_TCHAR *built = _T("Built ");
 		int		sc = 0;
 
 #ifdef _UNICODE
-		MultiByteToWideChar (CP_ACP, 0, serverInfo[INFO_GAMEDATE], -1, server->szGameDate, tsizeof(server->szGameDate)-1);
+		MultiByteToWideChar (CP_ACP, 0, serverInfo[INFO_GAMEDATE], -1, server->szGameDate, tsizeof(server->szGameDate) - 1);
 #else
-		Q_strncpy (server->szGameDate, serverInfo[INFO_GAMEDATE], sizeof(server->szGameDate)-1);
+		Q_strncpy (server->szGameDate, serverInfo[INFO_GAMEDATE], sizeof(server->szGameDate) - 1);
 #endif
 
 		p = _tcsstr(server->szGameDate, built);
 		if (p)
 		{
 			StringCbCopy(server->szGameDate, sizeof(server->szGameDate), p + 6);
-			while (*p && *(p+1))
+			while (*p && *(p + 1))
 			{
-				if (_istspace (*p) && !_istspace (*(p+1)))
+				if (_istspace (*p) && !_istspace (*(p + 1)))
 					sc++;
 
 				if (sc == 3)
@@ -1012,45 +1013,45 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 
 		server->players[players].ping = atoi(token);
 
-		token = strtok_s ( NULL, "\"", &next_token);
+		token = strtok_s (NULL, "\"", &next_token);
 
 		if (token)
 		{
 #if QUERY_STYLE == 2
-			_TCHAR	*p, *q;
+			_TCHAR *p, *q;
 			int		skip;
 #endif
 
 #ifdef _UNICODE
-			MultiByteToWideChar (CP_ACP, 0, token, -1, server->players[players].playername, tsizeof(server->players[players].playername)-1);
+			MultiByteToWideChar (CP_ACP, 0, token, -1, server->players[players].playername, tsizeof(server->players[players].playername) - 1);
 #else
-			Q_strncpy (server->players[players].playername, token, sizeof(server->players[players].playername)-1);
+			Q_strncpy (server->players[players].playername, token, sizeof(server->players[players].playername) - 1);
 #endif
 
 #if QUERY_STYLE == 2
-		p = q = server->players[players].playername;
-		skip = 0;
-		while (p[0])
-		{
-			if (p[0] == '^')
-				skip++;
-			else if (!_istprint (p[0]))
+			p = q = server->players[players].playername;
+			skip = 0;
+			while (p[0])
 			{
-			}
-			else
-			{
-				if (!skip)
+				if (p[0] == '^')
+					skip++;
+				else if (!_istprint (p[0]))
 				{
-					q[0] = p[0];
-					q++;
 				}
 				else
-					skip--;
-			}
+				{
+					if (!skip)
+					{
+						q[0] = p[0];
+						q++;
+					}
+					else
+						skip--;
+				}
 
-			p++;
-		}
-		q[0] = 0;
+				p++;
+			}
+			q[0] = 0;
 #endif
 
 		}
@@ -1063,7 +1064,7 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 
 	server->curClients = players;
 
-	if (!((!show_full && server->curClients >= server->maxClients - server->reservedSlots) || 
+	if (!((!show_full && server->curClients >= server->maxClients - server->reservedSlots) ||
 		(!show_empty && server->curClients == 0)))
 	{
 		memset (&lvI, 0, sizeof(lvI));
@@ -1078,7 +1079,7 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 		lvI.lParam = (LPARAM)(server - servers);
 		lvI.pszText = LPSTR_TEXTCALLBACK;
 
-		i = SendMessage (hWndList, LVM_INSERTITEM, 0, (LPARAM) (const LPLVITEM) &lvI);
+		i = SendMessage (hWndList, LVM_INSERTITEM, 0, (LPARAM)(const LPLVITEM)&lvI);
 		SendMessage (hWndList, LVM_SORTITEMS, lastSortOrder, (LPARAM)CompareFunc);
 
 #ifdef DEFERRED_REFRESH
@@ -1086,7 +1087,7 @@ VOID ParseQueryResponse (BYTE *recvBuff, int result, SERVERINFO *server)
 		ValidateRect (hWndList, NULL);
 #endif
 
-		globalServers ++;
+		globalServers++;
 		globalPlayers += players;
 
 		UpdateInfoCounts ();
@@ -1165,7 +1166,7 @@ LONG QueryReader (VOID *arg)
 void SendRequest (SERVERINFO *server)
 {
 	SOCKADDR_IN		addr;
-	BYTE			request[] = GAME_REQUEST_PACKET;	
+	BYTE			request[] = GAME_REQUEST_PACKET;
 	int				result;
 
 	ZeroMemory (&addr, sizeof(addr));
@@ -1197,7 +1198,7 @@ void RequestHandler (void)
 	DWORD	threadID;
 	BOOL	needSleep;
 	DWORD	lastListRefresh;
-	_TCHAR	*text;
+	_TCHAR *text;
 
 	HANDLE		handleArray[2];
 
@@ -1320,7 +1321,7 @@ abortLoop:
 void GetServerList (void)
 {
 	SOCKET		master;
-	HOSTENT		*hp;
+	HOSTENT *hp;
 	int			i, result, total;
 	TIMEVAL		delay;
 	fd_set		stoc;
@@ -1332,9 +1333,9 @@ void GetServerList (void)
 	StatusBar (_T("Resolving ") MASTER_SERVER _T("..."));
 
 #ifdef _UNICODE
-	WideCharToMultiByte (CP_ACP, 0, MASTER_SERVER, -1, queryBuff, sizeof(queryBuff)-1, NULL, NULL);
+	WideCharToMultiByte (CP_ACP, 0, MASTER_SERVER, -1, queryBuff, sizeof(queryBuff) - 1, NULL, NULL);
 #else
-	Q_strncpy (queryBuff, MASTER_SERVER, sizeof(queryBuff)-1);
+	Q_strncpy (queryBuff, MASTER_SERVER, sizeof(queryBuff) - 1);
 #endif
 
 	hp = gethostbyname (queryBuff);
@@ -1346,7 +1347,7 @@ void GetServerList (void)
 		scanInProgress = FALSE;
 		EnableWindow (GetDlgItem (hwndMain, IDC_CONFIG), TRUE);
 		EnableWindow (GetDlgItem (hwndMain, IDC_UPDATE), TRUE);
-		_endthreadex (1); 
+		_endthreadex (1);
 	}
 
 	gotEOF = FALSE;
@@ -1405,7 +1406,7 @@ void GetServerList (void)
 		}
 		else
 		{
-			StatusBar (_T("Retrying ") MASTER_SERVER _T(" (attempt %d)..."), i+1);
+			StatusBar (_T("Retrying ") MASTER_SERVER _T(" (attempt %d)..."), i + 1);
 		}
 	}
 
@@ -1518,8 +1519,8 @@ reParse:
 	globalPlayers = globalServers = 0;
 
 	StatusBar (_T("Querying servers..."));
-	SendMessage (hWndStatus, SB_SETTEXT, (WPARAM) 1, (LPARAM) _T("0 Players"));
-	SendMessage (hWndStatus, SB_SETTEXT, (WPARAM) 2, (LPARAM) _T("0 Servers"));
+	SendMessage (hWndStatus, SB_SETTEXT, (WPARAM)1, (LPARAM)_T("0 Players"));
+	SendMessage (hWndStatus, SB_SETTEXT, (WPARAM)2, (LPARAM)_T("0 Servers"));
 
 	RequestHandler ();
 
@@ -1552,7 +1553,7 @@ void UpdateServerList (VOID)
 {
 	LVITEM		lvI;
 	int			i;
-	SERVERINFO	*server;
+	SERVERINFO *server;
 	int			newGlobalServers;
 
 	show_empty = SendDlgItemMessage (hwndMain, IDC_INCLUDE_EMPTY, BM_GETCHECK, 0, 0);
@@ -1611,7 +1612,7 @@ void UpdateServerList (VOID)
 		lvI.iSubItem = 0;
 		lvI.lParam = (LPARAM)(server - servers);
 		lvI.pszText = LPSTR_TEXTCALLBACK;
-		SendMessage (hWndList, LVM_INSERTITEM, 0, (LPARAM) (const LPLVITEM) &lvI);
+		SendMessage (hWndList, LVM_INSERTITEM, 0, (LPARAM)(const LPLVITEM)&lvI);
 	}
 
 	UpdatePlayerList ();
@@ -1646,27 +1647,27 @@ void UpdatePlayerList (VOID)
 	pitem.mask = LVIF_PARAM;
 
 	SendMessage (hWndList, LVM_GETITEM, 0, (LPARAM)(LPLVITEM)&pitem);
-	
+
 	index = pitem.lParam;
 
 	memset (&lvI, 0, sizeof(lvI));
 
 	lvI.mask = LVIF_TEXT | LVIF_PARAM | LVIF_STATE;
 
-	lvI.state = 0; 
+	lvI.state = 0;
 	lvI.stateMask = 0;
 
 	// Initialize LVITEM members that are different for each item. 
 	//for (index = 0; index < 3; index++)	{
 	for (i = 0; i < servers[index].curClients; i++)
 	{
-   		lvI.iItem = i;
+		lvI.iItem = i;
 		lvI.iImage = 0;
 		lvI.iSubItem = 0;
 		lvI.lParam = (LPARAM)&servers[index].players[i];
 		lvI.pszText = LPSTR_TEXTCALLBACK;
 
-		SendMessage (hWndPlayerList, LVM_INSERTITEM, 0, (LPARAM) (const LPLVITEM) &lvI);
+		SendMessage (hWndPlayerList, LVM_INSERTITEM, 0, (LPARAM)(const LPLVITEM)&lvI);
 	}
 
 	//SendMessage (hWndInfoList, LVM_INSERTITEM, 0, (LPARAM) (const LPLVITEM) &lvI);
@@ -1679,7 +1680,7 @@ LRESULT ResizeWindow (WPARAM wParam, LPARAM lParam)
 	int		index;
 
 	float	widthScale, heightScale;
-    
+
 	int		width[3];
 
 	newWidth = LOWORD(lParam);
@@ -1691,7 +1692,7 @@ LRESULT ResizeWindow (WPARAM wParam, LPARAM lParam)
 	// Add the columns.
 	for (index = 0; index < sizeof(columns) / sizeof(columns[0]); index++)
 	{
-		int	cx = (int)(((659 * widthScale)-20) * (columns[index].relWidth / 100.0f));
+		int	cx = (int)(((659 * widthScale) - 20) * (columns[index].relWidth / 100.0f));
 		ListView_SetColumnWidth (hWndList, index, cx);
 	}
 
@@ -1702,13 +1703,13 @@ LRESULT ResizeWindow (WPARAM wParam, LPARAM lParam)
 		width[2] = 25;
 		for (index = 0; index < 3; index++)
 		{
-			int cx = (int)(((296 * widthScale)-20) * (width[index] / 100.0f));
+			int cx = (int)(((296 * widthScale) - 20) * (width[index] / 100.0f));
 			ListView_SetColumnWidth (hWndPlayerList, index, cx);
 		}
 	}
 	else
 	{
-		int cx = (int)(((296 * widthScale)-20) * 0.33f);
+		int cx = (int)(((296 * widthScale) - 20) * 0.33f);
 		ListView_SetColumnWidth (hWndPlayerList, 0, cx);
 	}
 
@@ -1720,7 +1721,7 @@ VOID UpdateServers (VOID)
 	if (scanInProgress)
 	{
 		SetEvent (hTerminateScanEvent);
-        EnableWindow (GetDlgItem (hwndMain, IDC_UPDATE), FALSE);
+		EnableWindow (GetDlgItem (hwndMain, IDC_UPDATE), FALSE);
 		return;
 	}
 	SetDlgItemText (hwndMain, IDC_UPDATE, _T("Abort"));
@@ -1734,7 +1735,7 @@ VOID UpdateServers (VOID)
 
 LRESULT HandleMinMax (WPARAM wParam, LPARAM lParam)
 {
-	MINMAXINFO	*info;
+	MINMAXINFO *info;
 
 	info = (PMINMAXINFO)lParam;
 
@@ -1746,8 +1747,8 @@ LRESULT HandleMinMax (WPARAM wParam, LPARAM lParam)
 
 VOID ParseBuddyList (VOID)
 {
-	_TCHAR	*buddies;
-	_TCHAR	*p;
+	_TCHAR *buddies;
+	_TCHAR *p;
 	INT		x;
 	_TCHAR	buddy[32];
 	SIZE_T		len;
@@ -1792,10 +1793,10 @@ VOID ParseBuddyList (VOID)
 		}
 		else
 		{
-			if (x < tsizeof(buddy)-1)
+			if (x < tsizeof(buddy) - 1)
 				buddy[x++] = p[0];
 			else
-				buddy[tsizeof(buddy)-1] = 0;
+				buddy[tsizeof(buddy) - 1] = 0;
 		}
 
 		if (p[0] == '\0')
@@ -1829,9 +1830,9 @@ VOID InitMainDialog (HWND hWnd)
 		return;
 	}
 
-	g_isXP = ( (osvi.dwMajorVersion > 5) || ( (osvi.dwMajorVersion == 5) && (osvi.dwMinorVersion >= 1) ));
+	g_isXP = ((osvi.dwMajorVersion > 5) || ((osvi.dwMajorVersion == 5) && (osvi.dwMinorVersion >= 1)));
 
-	error = WSAStartup ((WORD)MAKEWORD (2,2), &ws);
+	error = WSAStartup ((WORD)MAKEWORD (2, 2), &ws);
 	if (error)
 	{
 		MessageBox (hwndMain, _T("Couldn't load Winsock!"), _T("Error"), MB_OK);
@@ -1851,25 +1852,25 @@ VOID InitMainDialog (HWND hWnd)
 	hWndList = LV_CreateListView (hwndMain, hThisInstance, 5, NULL);
 
 	{
-		DIALOG_SIZER_START( sz )
-			DIALOG_SIZER_ENTRY( IDC_CONFIG, DS_MoveX | DS_MoveY )
-			DIALOG_SIZER_ENTRY( IDC_ABOUT, DS_MoveX | DS_MoveY )
-			DIALOG_SIZER_ENTRY( IDC_UPDATE, DS_MoveX | DS_MoveY )
-			DIALOG_SIZER_ENTRY( IDC_EXIT, DS_MoveX | DS_MoveY )
-			DIALOG_SIZER_ENTRY( IDC_SERVERLIST, DS_SizeX | DS_SizeY )
-			DIALOG_SIZER_ENTRY( IDC_PLAYERS, DS_SizeX | DS_MoveY )
-			DIALOG_SIZER_ENTRY( IDC_SERVERFRAME, DS_SizeY | DS_SizeX )
-			DIALOG_SIZER_ENTRY( IDC_PLAYERSFRAME, DS_SizeX | DS_MoveY )
-			DIALOG_SIZER_ENTRY( IDC_CONTROLSFRAME, DS_MoveX | DS_MoveY )
-			DIALOG_SIZER_ENTRY( IDC_STATUSBAR, DS_MoveX | DS_MoveY | DS_SizeX )
-			DIALOG_SIZER_ENTRY( IDC_INCLUDE_EMPTY, DS_MoveX | DS_MoveY )
-			DIALOG_SIZER_ENTRY( IDC_INCLUDE_FULL, DS_MoveX | DS_MoveY )
-			DIALOG_SIZER_ENTRY( IDC_FILTERGROUP, DS_MoveX | DS_MoveY )
-			DIALOG_SIZER_ENTRY( IDC_MOD, DS_MoveX | DS_MoveY )
-			DIALOG_SIZER_ENTRY( IDC_LABELMOD, DS_MoveX | DS_MoveY )
-			DIALOG_SIZER_ENTRY( IDC_FILTERGROUP, DS_MoveX | DS_MoveY )
-		DIALOG_SIZER_END()
-		DialogSizer_Set( hWnd, sz, TRUE, NULL );
+		DIALOG_SIZER_START(sz)
+			DIALOG_SIZER_ENTRY(IDC_CONFIG, DS_MoveX | DS_MoveY)
+			DIALOG_SIZER_ENTRY(IDC_ABOUT, DS_MoveX | DS_MoveY)
+			DIALOG_SIZER_ENTRY(IDC_UPDATE, DS_MoveX | DS_MoveY)
+			DIALOG_SIZER_ENTRY(IDC_EXIT, DS_MoveX | DS_MoveY)
+			DIALOG_SIZER_ENTRY(IDC_SERVERLIST, DS_SizeX | DS_SizeY)
+			DIALOG_SIZER_ENTRY(IDC_PLAYERS, DS_SizeX | DS_MoveY)
+			DIALOG_SIZER_ENTRY(IDC_SERVERFRAME, DS_SizeY | DS_SizeX)
+			DIALOG_SIZER_ENTRY(IDC_PLAYERSFRAME, DS_SizeX | DS_MoveY)
+			DIALOG_SIZER_ENTRY(IDC_CONTROLSFRAME, DS_MoveX | DS_MoveY)
+			DIALOG_SIZER_ENTRY(IDC_STATUSBAR, DS_MoveX | DS_MoveY | DS_SizeX)
+			DIALOG_SIZER_ENTRY(IDC_INCLUDE_EMPTY, DS_MoveX | DS_MoveY)
+			DIALOG_SIZER_ENTRY(IDC_INCLUDE_FULL, DS_MoveX | DS_MoveY)
+			DIALOG_SIZER_ENTRY(IDC_FILTERGROUP, DS_MoveX | DS_MoveY)
+			DIALOG_SIZER_ENTRY(IDC_MOD, DS_MoveX | DS_MoveY)
+			DIALOG_SIZER_ENTRY(IDC_LABELMOD, DS_MoveX | DS_MoveY)
+			DIALOG_SIZER_ENTRY(IDC_FILTERGROUP, DS_MoveX | DS_MoveY)
+			DIALOG_SIZER_END()
+			DialogSizer_Set(hWnd, sz, TRUE, NULL);
 	}
 
 	if (!(RegOpenKeyEx(HKEY_CURRENT_USER, _T("SOFTWARE\\r1ch.net\\") APP_NAME, 0, KEY_READ, &hk)))
@@ -1944,7 +1945,7 @@ VOID InitMainDialog (HWND hWnd)
 	else if (version == 1)
 	{
 #ifdef _UNICODE
-		char	*p;
+		char *p;
 		p = (char *)_tcsdup (q2Buddies);
 		if (!p)
 		{
@@ -1968,7 +1969,7 @@ VOID InitMainDialog (HWND hWnd)
 			RegCloseKey (hk);
 		}
 	}
-		
+
 	if (!q2Exe[0])
 		StringCbCopy (q2Exe, sizeof(q2Exe), DEFAULT_EXECUTABLE_NAME);
 
@@ -2014,26 +2015,28 @@ VOID ShowServerContextMenu (LPNMITEMACTIVATE ev)
 	AppendMenu (menu, MF_STRING, 2, _T("Copy Server IP"));
 	AppendMenu (menu, MF_STRING, 3, _T("Server Info"));
 
-	ClientToScreen (hwndMain, &ev->ptAction); 
+	ClientToScreen (hwndMain, &ev->ptAction);
 
-    i = TrackPopupMenuEx (menu, TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, ev->ptAction.x, ev->ptAction.y, hwndMain, NULL); 
+	i = TrackPopupMenuEx (menu, TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, ev->ptAction.x, ev->ptAction.y, hwndMain, NULL);
 
 	if (i == 1)
-		RunQ2 (ev);
+	{
+		LaunchDK (ev);
+	}
 	else if (i == 2)
 	{
-		struct	in_addr tmp;	
+		struct	in_addr tmp;
 		DWORD	index;
 		LVITEM	pitem;
 		SIZE_T	cch;
-		LPTSTR  lptstrCopy; 
+		LPTSTR  lptstrCopy;
 		HGLOBAL hglbCopy;
 		_TCHAR	serverIP[64];
 
 		if (!OpenClipboard(hwndMain))
-			goto abortMenu; 
+			goto abortMenu;
 
-		EmptyClipboard (); 
+		EmptyClipboard ();
 
 		memset (&pitem, 0, sizeof(pitem));
 
@@ -2047,24 +2050,24 @@ VOID ShowServerContextMenu (LPNMITEMACTIVATE ev)
 
 		tmp.S_un.S_addr = servers[index].ip;
 #ifdef _UNICODE
-		StringCbPrintf (serverIP, sizeof(serverIP), _T("%S:%d"), inet_ntoa(tmp), servers[index].port); 
+		StringCbPrintf (serverIP, sizeof(serverIP), _T("%S:%d"), inet_ntoa(tmp), servers[index].port);
 #else
-		StringCbPrintf (serverIP, sizeof(serverIP), _T("%s:%d"), inet_ntoa(tmp), servers[index].port); 
+		StringCbPrintf (serverIP, sizeof(serverIP), _T("%s:%d"), inet_ntoa(tmp), servers[index].port);
 #endif
 
 		cch = _tcslen (serverIP);
 
-		hglbCopy = GlobalAlloc(GMEM_MOVEABLE, (cch + 1) * sizeof(TCHAR)); 
-		if (hglbCopy == NULL) 
-		{ 
-			CloseClipboard(); 
-			goto abortMenu; 
-		} 
+		hglbCopy = GlobalAlloc(GMEM_MOVEABLE, (cch + 1) * sizeof(TCHAR));
+		if (hglbCopy == NULL)
+		{
+			CloseClipboard();
+			goto abortMenu;
+		}
 
-		lptstrCopy = GlobalLock(hglbCopy); 
-		memcpy (lptstrCopy, serverIP, cch * sizeof(TCHAR)); 
-		lptstrCopy[cch] = (TCHAR) 0;
-		GlobalUnlock(hglbCopy); 
+		lptstrCopy = GlobalLock(hglbCopy);
+		memcpy (lptstrCopy, serverIP, cch * sizeof(TCHAR));
+		lptstrCopy[cch] = (TCHAR)0;
+		GlobalUnlock(hglbCopy);
 
 		// Place the handle on the clipboard.
 #ifdef _UNICODE
@@ -2139,7 +2142,7 @@ BOOL BuddyIsPlayer (PLAYERINFO *player)
 
 	for (x = 0; x < numBuddies; x++)
 	{
-		if (!_tcsicmp (player->playername, buddyList[x].name) || 
+		if (!_tcsicmp (player->playername, buddyList[x].name) ||
 			_tcsstr (player->playername, buddyList[x].name))
 		{
 			ret = TRUE;
@@ -2160,18 +2163,18 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 	if (p->code == NM_CUSTOMDRAW)
 	{
 		NMLVCUSTOMDRAW *lvcd = (NMLVCUSTOMDRAW *)p;
-		NMCUSTOMDRAW   *nmcd = &lvcd->nmcd;
+		NMCUSTOMDRAW *nmcd = &lvcd->nmcd;
 
 		switch (nmcd->dwDrawStage)
 		{
-		case CDDS_PREPAINT:
+			case CDDS_PREPAINT:
 
-			// We want item prepaint notifications, so...
-			pResult = CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYSUBITEMDRAW;
-			break;
+				// We want item prepaint notifications, so...
+				pResult = CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYSUBITEMDRAW;
+				break;
 
-		case CDDS_ITEMPREPAINT:
-		case CDDS_ITEMPREPAINT | CDDS_SUBITEM:
+			case CDDS_ITEMPREPAINT:
+			case CDDS_ITEMPREPAINT | CDDS_SUBITEM:
 			{
 				int iRow = (int)nmcd->dwItemSpec;
 
@@ -2189,7 +2192,7 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 
 				if (hWnd == hWndList)
 				{
-					SERVERINFO	*server;
+					SERVERINFO *server;
 					LVITEM		item;
 					BOOL		buddy;
 
@@ -2305,7 +2308,7 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 				else if (hWnd == hWndPlayerList)
 				{
 					LVITEM		item;
-					PLAYERINFO	*player;
+					PLAYERINFO *player;
 
 					memset (&item, 0, sizeof(item));
 					item.iItem = iRow;
@@ -2326,8 +2329,8 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 				break;
 			}
 
-		case CDDS_ITEMPOSTPAINT:
-		case CDDS_ITEMPOSTPAINT | CDDS_SUBITEM:
+			case CDDS_ITEMPOSTPAINT:
+			case CDDS_ITEMPOSTPAINT | CDDS_SUBITEM:
 			{
 				int iRow = (int)nmcd->dwItemSpec;
 
@@ -2345,7 +2348,7 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 
 				if (hWnd == hWndList)
 				{
-					SERVERINFO	*server;
+					SERVERINFO *server;
 					LVITEM		item;
 					BOOL		buddy;
 
@@ -2381,16 +2384,16 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 
 						ListView_GetSubItemRect (hWndList, iRow, 1, LVIR_BOUNDS, &rc2);*/
 
-					/*	if (bg)
-						{
-							FillRect (nmcd->hdc, &rc2, bg);
-							DeleteObject (bg);
-						}
-						else
-							FillRect (nmcd->hdc, &rc2, (HBRUSH)(COLOR_WINDOW+1));*/
+						/*	if (bg)
+							{
+								FillRect (nmcd->hdc, &rc2, bg);
+								DeleteObject (bg);
+							}
+							else
+								FillRect (nmcd->hdc, &rc2, (HBRUSH)(COLOR_WINDOW+1));*/
 
 						ListView_GetSubItemRect (hWndList, iRow, 1, LVIR_ICON, &rc);
-//						ImageList_DrawEx (hCountry, server->cID, nmcd->hdc, rc.left + 1, rc.top + 1, 18, 12, CLR_NONE, CLR_NONE, ILD_NORMAL);
+						//						ImageList_DrawEx (hCountry, server->cID, nmcd->hdc, rc.left + 1, rc.top + 1, 18, 12, CLR_NONE, CLR_NONE, ILD_NORMAL);
 						pResult |= CDRF_SKIPDEFAULT;
 
 						tmp.S_un.S_addr = server->ip;
@@ -2453,9 +2456,9 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 				break;
 			}
 
-		default:
-			pResult = CDRF_NOTIFYPOSTPAINT | CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYSUBITEMDRAW;
-			break;
+			default:
+				pResult = CDRF_NOTIFYPOSTPAINT | CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYSUBITEMDRAW;
+				break;
 		}
 	}
 
@@ -2478,8 +2481,8 @@ VOID SortServerListView (NMLVDISPINFO *info)
 VOID FillServerListView (NMLVDISPINFO *info)
 {
 	int					index;
-	const column_t		*column;
-	const SERVERINFO	*server;
+	const column_t *column;
+	const SERVERINFO *server;
 
 	index = info->item.iSubItem;
 	if (index >= sizeof(columns) / sizeof(columns[0]))
@@ -2491,7 +2494,7 @@ VOID FillServerListView (NMLVDISPINFO *info)
 		return;
 
 	server = &servers[info->item.lParam];
-	
+
 	switch (column->mapping)
 	{
 		case INFO_HOSTNAME:
@@ -2515,7 +2518,7 @@ VOID FillServerListView (NMLVDISPINFO *info)
 			info->item.pszText[0] = _T('\0');
 #endif
 		}
-			break;
+		break;
 		case INFO_IPADDRESS:
 		{
 #if 1
@@ -2536,7 +2539,7 @@ VOID FillServerListView (NMLVDISPINFO *info)
 			info->item.pszText[0] = _T('\0');
 #endif // 1
 		}
-			break;
+		break;
 
 		case INFO_MAP_NAME:
 			StringCchCopy (info->item.pszText, info->item.cchTextMax, server->szMapName);
@@ -2669,9 +2672,9 @@ LRESULT CALLBACK WndProcMain(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 			}
 			break;
 		case WM_COMMAND:
-			wmId    = LOWORD(wParam); 
-			wmEvent = HIWORD(wParam); 
-			 
+			wmId = LOWORD(wParam);
+			wmEvent = HIWORD(wParam);
+
 			// Parse the menu selections:
 			switch (wmId)
 			{
@@ -2700,11 +2703,11 @@ LRESULT CALLBACK WndProcMain(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 					return FALSE;
 			}
 			break;
-		/*case WM_PAINT:
-			hdc = BeginPaint(hWnd, &ps);
-			// TODO: Add any drawing code here...
-			EndPaint(hWnd, &ps);
-			break;*/
+			/*case WM_PAINT:
+				hdc = BeginPaint(hWnd, &ps);
+				// TODO: Add any drawing code here...
+				EndPaint(hWnd, &ps);
+				break;*/
 		case WM_CLOSE:
 			DestroyWindow (hwndMain);
 			return TRUE;
@@ -2726,7 +2729,7 @@ LRESULT CALLBACK WndProcMain(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 							UpdatePlayerList ();
 							break;
 						case NM_DBLCLK:
-							RunQ2 ((LPNMITEMACTIVATE)lParam);
+							LaunchDK ((LPNMITEMACTIVATE)lParam);
 							break;
 						case NM_RCLICK:
 							ShowServerContextMenu ((LPNMITEMACTIVATE)lParam);
@@ -2740,57 +2743,57 @@ LRESULT CALLBACK WndProcMain(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 					}
 					break;
 				case IDC_PLAYERS:
-						switch (((LPNMHDR) lParam)->code)
-						{
-							case NM_CUSTOMDRAW:
-								SetWindowLongPtr (hWnd, DWLP_MSGRESULT, CustomDrawHandler (hWndPlayerList, wParam, lParam));
-								return TRUE;
-							case NM_RCLICK:
-								if (g_isXP)
-								{
-									if (listIsDetailed)
-										SendMessage (hWndPlayerList, LVM_SETVIEW, LV_VIEW_SMALLICON, 0);
-									else
-										SendMessage (hWndPlayerList, LVM_SETVIEW, LV_VIEW_DETAILS, 0);
-
-									listIsDetailed = !listIsDetailed;
-								}
-								break;
-							case LVN_COLUMNCLICK:
-								SendMessage (hWndPlayerList, LVM_SORTITEMS, ((LPNMLVDISPINFOW)lParam)->item.iItem, (LPARAM)CompareFunc2);
-								/*if (lastSortOrder == ((LPNMLVDISPINFOW)lParam)->item.iItem)
-									lastSortOrder = -1;
+					switch (((LPNMHDR)lParam)->code)
+					{
+						case NM_CUSTOMDRAW:
+							SetWindowLongPtr (hWnd, DWLP_MSGRESULT, CustomDrawHandler (hWndPlayerList, wParam, lParam));
+							return TRUE;
+						case NM_RCLICK:
+							if (g_isXP)
+							{
+								if (listIsDetailed)
+									SendMessage (hWndPlayerList, LVM_SETVIEW, LV_VIEW_SMALLICON, 0);
 								else
-									lastSortOrder = ((LPNMLVDISPINFOW)lParam)->item.iItem;*/
-								break;
-							case LVN_GETDISPINFO:
-								/*index = SendMessage (hWndList, LVM_GETSELECTIONMARK, 0, 0);
-								memset (&pitem, 0, sizeof(pitem));
-								pitem.iItem = index;
-								pitem.iSubItem = 0;
-								pitem.mask = LVIF_PARAM;
+									SendMessage (hWndPlayerList, LVM_SETVIEW, LV_VIEW_DETAILS, 0);
 
-								SendMessage (hWndList, LVM_GETITEM, 0, (LPARAM)(LPLVITEM)&pitem);
-								index = pitem.lParam;*/
-								switch (((NMLVDISPINFO *)lParam)->item.iSubItem)
-								{
-									case 0:
-										//((LPNMLVDISPINFOW)lParam)->item.pszText = (LPWSTR)servers[index].players[((LPNMLVDISPINFOW)lParam)->item.lParam].playername;
-										StringCchCopy (((NMLVDISPINFO *)lParam)->item.pszText, ((NMLVDISPINFO *)lParam)->item.cchTextMax, ((PLAYERINFO *)((NMLVDISPINFO *)lParam)->item.lParam)->playername);
-										break;
-									case 1:
-										StringCchPrintf (((NMLVDISPINFO *)lParam)->item.pszText, ((NMLVDISPINFO *)lParam)->item.cchTextMax, _T("%d"), ((PLAYERINFO *)((LPNMLVDISPINFOW)lParam)->item.lParam)->score);
-										//((LPNMLVDISPINFOW)lParam)->item.pszText = (LPWSTR)buff;
-										//_tcscpy (((NMLVDISPINFO *)lParam)->item.pszText, buff);
-										break;
-									case 2:
-										//_stprintf (buff, _T("%d"), ((PLAYERINFO *)((LPNMLVDISPINFOW)lParam)->item.lParam)->ping);
-										//((LPNMLVDISPINFOW)lParam)->item.pszText = (LPWSTR)buff;
-										StringCchPrintf (((NMLVDISPINFO *)lParam)->item.pszText, ((NMLVDISPINFO *)lParam)->item.cchTextMax, _T("%d"), ((PLAYERINFO *)((LPNMLVDISPINFOW)lParam)->item.lParam)->ping);
-										break;
-								}
-						}
-						break;
+								listIsDetailed = !listIsDetailed;
+							}
+							break;
+						case LVN_COLUMNCLICK:
+							SendMessage (hWndPlayerList, LVM_SORTITEMS, ((LPNMLVDISPINFOW)lParam)->item.iItem, (LPARAM)CompareFunc2);
+							/*if (lastSortOrder == ((LPNMLVDISPINFOW)lParam)->item.iItem)
+								lastSortOrder = -1;
+							else
+								lastSortOrder = ((LPNMLVDISPINFOW)lParam)->item.iItem;*/
+							break;
+						case LVN_GETDISPINFO:
+							/*index = SendMessage (hWndList, LVM_GETSELECTIONMARK, 0, 0);
+							memset (&pitem, 0, sizeof(pitem));
+							pitem.iItem = index;
+							pitem.iSubItem = 0;
+							pitem.mask = LVIF_PARAM;
+
+							SendMessage (hWndList, LVM_GETITEM, 0, (LPARAM)(LPLVITEM)&pitem);
+							index = pitem.lParam;*/
+							switch (((NMLVDISPINFO *)lParam)->item.iSubItem)
+							{
+								case 0:
+									//((LPNMLVDISPINFOW)lParam)->item.pszText = (LPWSTR)servers[index].players[((LPNMLVDISPINFOW)lParam)->item.lParam].playername;
+									StringCchCopy (((NMLVDISPINFO *)lParam)->item.pszText, ((NMLVDISPINFO *)lParam)->item.cchTextMax, ((PLAYERINFO *)((NMLVDISPINFO *)lParam)->item.lParam)->playername);
+									break;
+								case 1:
+									StringCchPrintf (((NMLVDISPINFO *)lParam)->item.pszText, ((NMLVDISPINFO *)lParam)->item.cchTextMax, _T("%d"), ((PLAYERINFO *)((LPNMLVDISPINFOW)lParam)->item.lParam)->score);
+									//((LPNMLVDISPINFOW)lParam)->item.pszText = (LPWSTR)buff;
+									//_tcscpy (((NMLVDISPINFO *)lParam)->item.pszText, buff);
+									break;
+								case 2:
+									//_stprintf (buff, _T("%d"), ((PLAYERINFO *)((LPNMLVDISPINFOW)lParam)->item.lParam)->ping);
+									//((LPNMLVDISPINFOW)lParam)->item.pszText = (LPWSTR)buff;
+									StringCchPrintf (((NMLVDISPINFO *)lParam)->item.pszText, ((NMLVDISPINFO *)lParam)->item.cchTextMax, _T("%d"), ((PLAYERINFO *)((LPNMLVDISPINFOW)lParam)->item.lParam)->ping);
+									break;
+							}
+					}
+					break;
 			}
 			break;
 
@@ -2808,8 +2811,8 @@ void GetResultsFromProxyDialog (HWND hDlg)
 	memset (q2Path, 0, sizeof(q2Path));
 	memset (q2Exe, 0, sizeof(q2Exe));
 
-	SendDlgItemMessage (hDlg, IDC_Q2PATH, WM_GETTEXT, tsizeof(q2Path)-1, (LPARAM)q2Path);
-	SendDlgItemMessage (hDlg, IDC_Q2EXE, WM_GETTEXT, tsizeof(q2Exe)-1, (LPARAM)q2Exe);
+	SendDlgItemMessage (hDlg, IDC_Q2PATH, WM_GETTEXT, tsizeof(q2Path) - 1, (LPARAM)q2Path);
+	SendDlgItemMessage (hDlg, IDC_Q2EXE, WM_GETTEXT, tsizeof(q2Exe) - 1, (LPARAM)q2Exe);
 
 	q2PacketsPerSecond = GetDlgItemInt (hDlg, IDC_PPS, NULL, TRUE);
 
@@ -2837,7 +2840,7 @@ void GetResultsFromProxyDialog (HWND hDlg)
 #ifdef _UNICODE
 	if (q2Path[0] && (q2Path[(sizeof(q2Path) / sizeof(*q2Path)) - 1] != '\\'))
 #else
-	if (q2Path[0] && (q2Path[_tcslen(q2Path)-1] != '\\'))
+	if (q2Path[0] && (q2Path[_tcslen(q2Path) - 1] != '\\'))
 #endif
 		StringCbCat (q2Path, sizeof(q2Path), _T("\\"));
 }
@@ -2866,36 +2869,36 @@ LRESULT CALLBACK Proxy(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
-	case WM_INITDIALOG:
-		SetDlgItemText (hDlg, IDC_Q2PATH, q2Path);
-		SetDlgItemText (hDlg, IDC_Q2EXE, q2Exe);
-		SetDlgItemInt (hDlg, IDC_PPS, q2PacketsPerSecond, TRUE);
-		SetDlgItemInt (hDlg, IDC_GOODPING, q2GoodPing, TRUE);
-		SetDlgItemInt (hDlg, IDC_OKPING, q2MediumPing, TRUE);
-		SetDlgItemText (hDlg, IDC_BUDDIES, q2Buddies);
-		return TRUE;
+		case WM_INITDIALOG:
+			SetDlgItemText (hDlg, IDC_Q2PATH, q2Path);
+			SetDlgItemText (hDlg, IDC_Q2EXE, q2Exe);
+			SetDlgItemInt (hDlg, IDC_PPS, q2PacketsPerSecond, TRUE);
+			SetDlgItemInt (hDlg, IDC_GOODPING, q2GoodPing, TRUE);
+			SetDlgItemInt (hDlg, IDC_OKPING, q2MediumPing, TRUE);
+			SetDlgItemText (hDlg, IDC_BUDDIES, q2Buddies);
+			return TRUE;
 
-	case WM_CLOSE:
-		GetResultsFromProxyDialog(hDlg);
-
-		EndDialog(hDlg, 0);
-		return TRUE;
-
-	case WM_COMMAND:
-		if (LOWORD(wParam) == IDOK)
-		{
+		case WM_CLOSE:
 			GetResultsFromProxyDialog(hDlg);
 
 			EndDialog(hDlg, 0);
 			return TRUE;
-		}
-		break;
+
+		case WM_COMMAND:
+			if (LOWORD(wParam) == IDOK)
+			{
+				GetResultsFromProxyDialog(hDlg);
+
+				EndDialog(hDlg, 0);
+				return TRUE;
+			}
+			break;
 	}
 	return FALSE;
 }
 
 int PASCAL WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
-					LPSTR lpszCmdLine, int nCmdShow)
+	LPSTR lpszCmdLine, int nCmdShow)
 {
 	MSG						msg;
 	HICON					hIcon;
@@ -2924,7 +2927,7 @@ int PASCAL WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		GetSystemMetrics(SM_CYSMICON),
 		0);
 
-	if(hIcon)
+	if (hIcon)
 		SendMessage (hwndMain, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
 
 	//PostMessage(hwndMain, UM_INIT2, 0, (LPARAM) lpszCmdLine);
@@ -2939,4 +2942,3 @@ int PASCAL WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	}
 	return (int)(msg.wParam);
 }
-

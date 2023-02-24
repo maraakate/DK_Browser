@@ -435,7 +435,7 @@ BOOL InitListViewImageLists(HWND hWndListView)
 	HIMAGELIST hSmall2;   // image list for other views 
 
 	// Create the full-sized icon image lists. 
-	hSmall = ImageList_Create(16, 14, ILC_COLOR32, 8, 0);
+	hSmall = ImageList_Create(16, 14, ILC_COLOR32|ILC_MASK, 8, 0);
 
 	hCountry = ImageList_Create(18, 14, ILC_COLOR32, 65, 0);
 

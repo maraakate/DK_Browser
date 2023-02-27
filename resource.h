@@ -29,6 +29,7 @@
 #define IDI_FREEBSD                     170
 #define IDI_MACOSX                      171
 #define IDD_ABOUTBOX                    301
+#define IDD_SERVERINFO                  302
 #define IDC_PROGRESS1                   1001
 #define IDC_PRETTY                      1002
 #define IDC_CANCEL                      1003
@@ -53,6 +54,8 @@
 #define IDC_GAMETYPE                    1032
 #define IDC_FILTERGROUP                 1034
 #define IDC_LABELMOD                    1035
+#define IDC_LIST1                       1036
+#define IDC_SERVERINFO                  1036
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -60,9 +63,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        302
+#define _APS_NEXT_RESOURCE_VALUE        303
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1036
+#define _APS_NEXT_CONTROL_VALUE         1037
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

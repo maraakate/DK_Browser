@@ -100,16 +100,19 @@ HANDLE PingHandle = NULL;
 DWORD PingThreadID = 0;
 
 // Forward declarations of functions included in this code module:
-BOOL				InitInstance(HINSTANCE, int);
-LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
-LRESULT CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
-LRESULT CALLBACK Proxy(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+BOOL				InitInstance (HINSTANCE, int);
+LRESULT CALLBACK	WndProc (HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK	About (HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK	ServerInfo (HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK	Proxy (HWND, UINT, WPARAM, LPARAM);
 void UpdatePlayerList (VOID);
 static void WndInitNotifyIconData (void);
 
 int numServers = 0;
 
 static int lastSortOrder;
+
+static int currentServerInfoIndex = 0; /* FS: FIXME: Crap hack because I don't know GUI code. */
 
 //#define nParts 4
 void RequestHandler (void);
@@ -609,20 +612,6 @@ HWND LV_CreateListView (HWND hWndParent, HINSTANCE hInst, int NumServers,
 	hWndList = GetDlgItem (hwndMain, IDC_SERVERLIST);
 	GetClientRect(hWndList, &rcl);
 	iWidth = (rcl.right - rcl.left);
-
-	/*width[0] = 35;
-	width[1] = 20;
-	width[2] = 10;
-	width[3] = 11;
-	width[4] = 15;
-	width[5] = 9;
-
-	columnTitle[0] = "Host Name";
-	columnTitle[1] = "Address";
-	columnTitle[2] = "Map";
-	columnTitle[3] = "Players";
-	columnTitle[4] = "DLL Date";
-	columnTitle[5] = "Ping";*/
 
 	SendMessage (hWndList, LVM_SETEXTENDEDLISTVIEWSTYLE, (WPARAM)0, (LPARAM)LVS_EX_SUBITEMIMAGES | LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER);
 
@@ -1845,6 +1834,7 @@ VOID InitMainDialog (HWND hWnd)
 		DIALOG_SIZER_START(sz)
 			DIALOG_SIZER_ENTRY(IDC_CONFIG, DS_MoveX | DS_MoveY)
 			DIALOG_SIZER_ENTRY(IDC_ABOUT, DS_MoveX | DS_MoveY)
+			DIALOG_SIZER_ENTRY(IDC_SERVERINFO, DS_MoveX | DS_MoveY)
 			DIALOG_SIZER_ENTRY(IDC_UPDATE, DS_MoveX | DS_MoveY)
 			DIALOG_SIZER_ENTRY(IDC_EXIT, DS_MoveX | DS_MoveY)
 			DIALOG_SIZER_ENTRY(IDC_SERVERLIST, DS_SizeX | DS_SizeY)
@@ -2081,10 +2071,9 @@ VOID ShowServerContextMenu (LPNMITEMACTIVATE ev)
 
 		SendMessage (hWndList, LVM_GETITEM, 0, (LPARAM)(LPLVITEM)&pitem);
 
-		index = pitem.lParam;
-
-		/* FS: TODO: Format this in a way that's not crap. */
-		MessageBox(hwndMain, servers[index].infostrings, _T("Server Info"), MB_OK);
+		/* FS: FIXME: This is wrong, but it works. */
+		currentServerInfoIndex = pitem.lParam;
+		DialogBox(hThisInstance, (LPCTSTR)IDD_SERVERINFO, hwndMain, (DLGPROC)ServerInfo);
 	}
 
 abortMenu:
@@ -2673,6 +2662,9 @@ LRESULT CALLBACK WndProcMain(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 				case IDC_ABOUT:
 					DialogBox(hThisInstance, (LPCTSTR)IDD_ABOUTBOX, hWnd, (DLGPROC)About);
 					break;
+				case IDC_SERVERINFO:
+					DialogBox(hThisInstance, (LPCTSTR)IDD_SERVERINFO, hWnd, (DLGPROC)ServerInfo);
+					break;
 				case IDC_EXIT:
 					DestroyWindow (hwndMain);
 					break;
@@ -2829,6 +2821,110 @@ void GetResultsFromProxyDialog (HWND hDlg)
 	if (q2Path[0] && (q2Path[_tcslen(q2Path) - 1] != '\\'))
 #endif
 		StringCbCat (q2Path, sizeof(q2Path), _T("\\"));
+}
+
+static void SetServerInfoColumns (HWND hDlg)
+{
+	HICON		icon;
+	HWND		hWndList;      // handle to the list view window
+	RECT		rcl;           // rectangle for setting the size of the window
+	int			index;          // index used in FOR loops
+	LVCOLUMN	lvC;      // list view column structure
+	int			iWidth;         // column width
+	int			width[2] = { 0 };
+	_TCHAR *columnTitle[2] = { 0 };
+	int i = 0;
+	LV_ITEM lvI;
+	const TCHAR *seps = "\\";
+	TCHAR *token;
+	TCHAR *next_token = NULL;
+	TCHAR *rLine = servers[currentServerInfoIndex].infostrings;
+
+	hWndList = GetDlgItem (hDlg, IDC_SERVERINFO);
+	GetClientRect(hWndList, &rcl);
+	iWidth = (rcl.right - rcl.left);
+
+	SendMessage (hWndList, LVM_SETEXTENDEDLISTVIEWSTYLE, (WPARAM)0, (LPARAM)LVS_EX_SUBITEMIMAGES | LVS_EX_FULLROWSELECT);
+
+	lvC.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM | LVCF_ORDER;
+	lvC.fmt = LVCFMT_LEFT;
+
+	columnTitle[0] = _T("Key");
+	columnTitle[1] = _T("Value");
+
+	width[0] = 25;
+	width[1] = 50;
+
+	iWidth -= 16;
+
+	for (index = 0; index < 2; index++)
+	{
+		lvC.cx = (int)(iWidth * (width[index] / 100.0f));
+		lvC.iSubItem = index;
+		lvC.pszText = columnTitle[index];
+		if (ListView_InsertColumn(hWndList, index, &lvC) == -1)
+			return;
+	}
+
+#ifdef UNICODE
+	token = wcstok(rLine, seps, &next_token);
+#else
+	token = strtok_s(rLine, seps, &next_token);
+#endif
+	while (token != NULL)
+	{
+		memset(&lvI, 0, sizeof(lvI));
+
+		lvI.mask = LVIF_TEXT;
+
+		lvI.iItem = i;
+		lvI.iSubItem = 0;
+		lvI.pszText = token;
+
+		ListView_InsertItem(hWndList, &lvI);
+
+#ifdef UNICODE
+		token = wcstok(NULL, seps, &next_token);
+#else
+		token = strtok_s(NULL, seps, &next_token);
+#endif
+		if (!token)
+			break;
+
+		lvI.iItem = i;
+		lvI.iSubItem = 1;
+		lvI.pszText = token;
+		ListView_SetItem(hWndList, &lvI);
+		i++;
+
+#ifdef UNICODE
+		token = wcstok(NULL, seps, &next_token);
+#else
+		token = strtok_s(NULL, seps, &next_token);
+#endif
+	}
+}
+
+LRESULT CALLBACK ServerInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+		case WM_INITDIALOG:
+			SetServerInfoColumns(hDlg);
+			return TRUE;
+		case WM_CLOSE:
+			EndDialog(hDlg, 0);
+			return TRUE;
+		case WM_COMMAND:
+			if (LOWORD(wParam) == IDOK)
+			{
+				EndDialog(hDlg, 0);
+				return TRUE;
+			}
+			break;
+	}
+
+	return FALSE;
 }
 
 LRESULT CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)

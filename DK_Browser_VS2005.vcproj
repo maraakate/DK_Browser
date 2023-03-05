@@ -356,7 +356,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\gsb.c"
+				RelativePath=".\dksb.c"
 				>
 			</File>
 			<File
@@ -378,7 +378,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\gsb.h"
+				RelativePath=".\dksb.h"
 				>
 			</File>
 			<File
@@ -404,7 +404,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\gsb.rc"
+				RelativePath=".\dksb.rc"
 				>
 			</File>
 			<File
@@ -489,7 +489,7 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath=".\readme_dkb.txt"
+			RelativePath=".\readme_dksb.txt"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"
@@ -529,7 +529,7 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath=".\TODO_DKB.txt"
+			RelativePath=".\TODO_DKSB.txt"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"

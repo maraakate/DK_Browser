@@ -13,6 +13,5 @@ TODO as of 03/05/23:
 * Auto-updater.
 * Fix highlighting columns.
 * Capture WM_NOTIFY for IDC_SERVERINFO for sorting.
-* Rename GSB to DKSB in code.
 * Test Unicode vs ANSI changes.  ANSI likely broken in a few spots.
-* Test VS2005.  Likely broken in a few spots.
+* Test on Win9x

@@ -163,13 +163,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dialogsizer_set.cpp" />
-    <ClCompile Include="gsb.c" />
+    <ClCompile Include="dksb.c" />
     <ClCompile Include="regqueryvalueexrecursive.cpp" />
     <ClCompile Include="regsetvalueexrecursive.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dialogsizer.h" />
-    <ClInclude Include="gsb.h" />
+    <ClInclude Include="dksb.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="WinHelper.h" />
   </ItemGroup>
@@ -187,12 +187,12 @@
     <None Include="windows.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="gsb.rc" />
+    <ResourceCompile Include="dksb.rc" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="gpl.txt" />
-    <Text Include="readme_dkb.txt" />
-    <Text Include="TODO_DKB.txt" />
+    <Text Include="readme_dksb.txt" />
+    <Text Include="TODO_DKSB.txt" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="DK_Browser.exe.manifest" />

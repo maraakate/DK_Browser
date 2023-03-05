@@ -18,7 +18,7 @@
     <ClCompile Include="dialogsizer_set.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gsb.c">
+    <ClCompile Include="dksb.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="regqueryvalueexrecursive.cpp">
@@ -32,7 +32,7 @@
     <ClInclude Include="dialogsizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="gsb.h">
+    <ClInclude Include="dksb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -78,14 +78,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="gsb.rc">
+    <ResourceCompile Include="dksb.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="gpl.txt" />
-    <Text Include="readme_dkb.txt" />
-    <Text Include="TODO_DKB.txt" />
+    <Text Include="readme_dksb.txt" />
+    <Text Include="TODO_DKSB.txt" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="DK_Browser.exe.manifest">

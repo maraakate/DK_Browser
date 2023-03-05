@@ -21,7 +21,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "gsb.h"
+#include "dksb.h"
 
 #define tsizeof(x) (sizeof((x))/sizeof((x)[0]))
 
@@ -510,7 +510,7 @@ BOOL InitListViewImageLists(HWND hWndListView)
 	return TRUE;
 }
 
-static inline UINT8 getByte (UINT32 x, int n)
+static __inline UINT8 getByte (UINT32 x, int n)
 {
 	return (x >> (n << 3)) & 0xff;
 }

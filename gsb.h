@@ -129,12 +129,7 @@ const column_t	columns[] =
 #define GAME_REQUEST_PACKET "\xFF\xFF\xFF\xFF" "status"
 #define QUERY_RESPONSE_HEADER_LEN	12
 #define QUERY_RESPONSE_SERVER_LEN	6
-#ifdef LAUNCH_FROM_CONFIG
-#define GAME_CMDLINE _T("\"%s\\%s\" +connect \"%s\"")
-#else
-#define GAME_CMDLINE _T("\"%s\" +connect \"%s\"")
-#endif
-#define GAME_REGPATH _T("SOFTWARE\\Gloom")
-#define GAME_REGKEY _T("InstallDir")
+#define GAME_REGPATH _T("SOFTWARE\\Eidos Interactive\\Daikatana\\1.00.000")
+#define GAME_REGKEY _T("SourcePath")
 
 #endif // _GSB_H

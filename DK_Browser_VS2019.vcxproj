@@ -184,7 +184,6 @@
     <None Include="icon6.ico" />
     <None Include="linux.ico" />
     <None Include="macos.ico" />
-    <None Include="quake2.ico" />
     <None Include="windows.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -197,6 +196,9 @@
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="DK_Browser.exe.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="daikatana.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

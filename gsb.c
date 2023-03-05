@@ -60,12 +60,14 @@ do { \
 HMENU		hTrayMenu;	// tray icon menu
 PNOTIFYICONDATA	notifyIconData;	// data for tray icon
 
-_TCHAR		q2Path[MAX_PATH];
-_TCHAR		q2Exe[MAX_PATH];
-_TCHAR *q2Buddies;
-int			q2PacketsPerSecond;
+_TCHAR		dkPath[MAX_PATH];
+_TCHAR		dkExe[MAX_PATH];
+_TCHAR *dkBuddies;
+int			packetsPerSecond;
 
-DWORD		q2GoodPing, q2MediumPing;
+BOOL		dkLaunchFromPath = FALSE;
+
+DWORD		goodPing, mediumPing;
 
 int			numBuddies;
 
@@ -181,7 +183,6 @@ VOID StatusBar (LPCTSTR fmt, ...)
 	SendMessage (hWndStatus, SB_SETTEXT, (WPARAM)0, (LPARAM)buff);
 }
 
-#ifdef LAUNCH_FROM_CONFIG
 _TCHAR *HPIFindTADir (_TCHAR *Path)
 {
 	_TCHAR *TAdir;
@@ -227,12 +228,12 @@ _TCHAR *HPIFindTADir (_TCHAR *Path)
 				return TAdir;
 			}
 		}
-		else if (!_tcsicmp (FileData.cFileName, q2Exe))
+		else if (!_tcsicmp (FileData.cFileName, dkExe))
 		{
 			_TCHAR	buff[512];
 			int		ans;
 
-			StringCbPrintf (buff, sizeof(buff), APP_NAME _T(" found '%s' in:\r\n\t%s\r\nIs this the one you wish to use?"), q2Exe, Path);
+			StringCbPrintf (buff, sizeof(buff), APP_NAME _T(" found '%s' in:\r\n\t%s\r\nIs this the one you wish to use?"), dkExe, Path);
 			ans = MessageBox (hwndMain, buff, GAME_NAME _T(" Location"), MB_YESNO + MB_ICONQUESTION);
 			if (ans == IDYES)
 			{
@@ -249,7 +250,6 @@ _TCHAR *HPIFindTADir (_TCHAR *Path)
 	FindClose(hSearch);
 	return NULL;
 }
-#endif
 
 void SaveStuff(void)
 {
@@ -261,18 +261,18 @@ void SaveStuff(void)
 	RegCreateKeyEx  (HKEY_CURRENT_USER, _T("SOFTWARE\\r1ch.net\\") APP_NAME, 0, NULL, 0, KEY_WRITE, NULL, &hk, &result);
 	if (!(RegOpenKeyEx (HKEY_CURRENT_USER, _T("SOFTWARE\\r1ch.net\\") APP_NAME, 0, KEY_WRITE, &hk)))
 	{
-		RegSetValueEx (hk, GAME_NAME _T(" Directory"), 0, REG_SZ, (const BYTE *)q2Path, (_tcslen(q2Path) + 1) * sizeof(_TCHAR));
-		RegSetValueEx (hk, GAME_NAME _T(" Executable"), 0, REG_SZ, (const BYTE *)q2Exe, (_tcslen(q2Exe) + 1) * sizeof(_TCHAR));
+		RegSetValueEx (hk, GAME_NAME _T(" Directory"), 0, REG_SZ, (const BYTE *)dkPath, (_tcslen(dkPath) + 1) * sizeof(_TCHAR));
+		RegSetValueEx (hk, GAME_NAME _T(" Executable"), 0, REG_SZ, (const BYTE *)dkExe, (_tcslen(dkExe) + 1) * sizeof(_TCHAR));
 
-		if (q2Buddies[0])
-			RegSetValueEx (hk, _T("Buddy List"), 0, REG_SZ, (const BYTE *)q2Buddies, (_tcslen(q2Buddies) + 1) * sizeof(_TCHAR));
+		if (dkBuddies[0])
+			RegSetValueEx (hk, _T("Buddy List"), 0, REG_SZ, (const BYTE *)dkBuddies, (_tcslen(dkBuddies) + 1) * sizeof(_TCHAR));
 		else
 			RegSetValueEx (hk, _T("Buddy List"), 0, REG_SZ, (const BYTE *)_T(""), 1 * sizeof(_TCHAR));
 
-		RegSetValueEx (hk, _T("Packets Per Second"), 0, REG_DWORD, (const BYTE *)&q2PacketsPerSecond, sizeof(DWORD));
+		RegSetValueEx (hk, _T("Packets Per Second"), 0, REG_DWORD, (const BYTE *)&packetsPerSecond, sizeof(DWORD));
 		RegSetValueEx (hk, _T("Player View Style"), 0, REG_DWORD, (const BYTE *)&listIsDetailed, sizeof(DWORD));
-		RegSetValueEx (hk, _T("Good Ping Threshold"), 0, REG_DWORD, (const BYTE *)&q2GoodPing, sizeof(DWORD));
-		RegSetValueEx (hk, _T("Medium Ping Threshold"), 0, REG_DWORD, (const BYTE *)&q2MediumPing, sizeof(DWORD));
+		RegSetValueEx (hk, _T("Good Ping Threshold"), 0, REG_DWORD, (const BYTE *)&goodPing, sizeof(DWORD));
+		RegSetValueEx (hk, _T("Medium Ping Threshold"), 0, REG_DWORD, (const BYTE *)&mediumPing, sizeof(DWORD));
 
 		temp = 2;
 		RegSetValueEx (hk, _T("Version"), 0, REG_DWORD, (const BYTE *)&temp, sizeof(DWORD));
@@ -289,6 +289,8 @@ void SaveStuff(void)
 
 		if (GetWindowPlacement (hwndMain, &winPlacement))
 			RegSetValueEx (hk, _T("Window Position"), 0, REG_BINARY, (const BYTE *)&winPlacement, sizeof(winPlacement));
+
+		RegSetValueEx(hk, _T("Launch from Path"), 0, REG_DWORD, (const BYTE *)&dkLaunchFromPath, sizeof(DWORD));
 
 		RegCloseKey (hk);
 	}
@@ -328,34 +330,35 @@ void LaunchDK (NMITEMACTIVATE *info)
 
 	//index = SendMessage (hWndList, LVM_GETSELECTIONMARK, 0, 0);
 
-	//q2Path[0] = 0;
+	//dkPath[0] = 0;
 	SendMessage (hWndList, LVM_GETITEM, 0, (LPARAM)(LPLVITEM)&pitem);
 
 	index = pitem.lParam;
 
-#ifdef LAUNCH_FROM_CONFIG
-	if (!q2Path[0])
+	if (dkLaunchFromPath)
 	{
-		int drive;
-
-		for (drive = 3; drive <= 26; drive++)
+		if (!dkPath[0])
 		{
-			_TCHAR *temp;
-			_TCHAR	dirtogo[4];
-			StringCbPrintf (dirtogo, sizeof(dirtogo), _T("%c:\\"), drive + 'A' - 1);
-			if (GetDriveType (dirtogo) == DRIVE_FIXED)
-			{
-				StatusBar (_T("Trying to find %s on %s..."), q2Exe, dirtogo);
-				temp = HPIFindTADir (dirtogo);
-				if (temp)
-					StringCbCopy (q2Path, sizeof(q2Path), temp);
+			int drive;
 
-				if (q2Path[0])
-					break;
+			for (drive = 3; drive <= 26; drive++)
+			{
+				_TCHAR *temp;
+				_TCHAR	dirtogo[4];
+				StringCbPrintf (dirtogo, sizeof(dirtogo), _T("%c:\\"), drive + 'A' - 1);
+				if (GetDriveType (dirtogo) == DRIVE_FIXED)
+				{
+					StatusBar (_T("Trying to find %s on %s..."), dkExe, dirtogo);
+					temp = HPIFindTADir (dirtogo);
+					if (temp)
+						StringCbCopy (dkPath, sizeof(dkPath), temp);
+
+					if (dkPath[0])
+						break;
+				}
 			}
 		}
 	}
-#endif
 
 	{
 		struct in_addr tmp;
@@ -372,51 +375,57 @@ void LaunchDK (NMITEMACTIVATE *info)
 
 	SetCursor(hcSave);
 
-#ifdef LAUNCH_FROM_CONFIG
-	if (!q2Path[0])
+	if (dkLaunchFromPath && !dkPath[0])
 	{
 		StatusBar (_T("Couldn't find a ") GAME_NAME _T(" executable!"));
 		MessageBox (hwndMain, _T("Unable to find your ") GAME_NAME _T(" executable!\r\n\r\nYou can't join a server until you have specified where ") GAME_NAME _T(" is on your system.\n\nTry setting the executable name manually in the config if you have a different executable name."), _T("Can't find ") GAME_NAME, MB_OK | MB_ICONEXCLAMATION);
 	}
 	else
-#endif
 	{
 		STARTUPINFO			s;
-		_TCHAR				q2buff[MAX_PATH];
+		_TCHAR				dkbuff[MAX_PATH];
 		PROCESS_INFORMATION	p;
 		_TCHAR				cmdLine[512];
-		_TCHAR				myQ2Path[MAX_PATH];
+		_TCHAR				myDKPath[MAX_PATH];
 
 		StatusBar (_T("Starting ") GAME_NAME _T("..."));
 
-		StringCbCopy (myQ2Path, sizeof(myQ2Path), q2Path);
+		StringCbCopy (myDKPath, sizeof(myDKPath), dkPath);
 
 		memset (&s, 0, sizeof(s));
 		s.cb = sizeof(s);
 
-#ifdef LAUNCH_FROM_CONFIG
-		StringCbPrintf (q2buff, sizeof(q2buff), _T("%s\\%s"), myQ2Path, q2Exe);
-#else
-		StringCbPrintf (q2buff, sizeof(q2buff), _T("%s"), q2Exe);
-#endif
-		if (GetFileAttributes (q2buff) == -1)
+		if (dkLaunchFromPath)
+		{
+			StringCbPrintf (dkbuff, sizeof(dkbuff), _T("%s\\%s"), myDKPath, dkExe);
+		}
+		else
+		{
+			StringCbPrintf (dkbuff, sizeof(dkbuff), _T("%s"), dkExe);
+		}
+
+		if (GetFileAttributes (dkbuff) == -1)
 		{
 			_TCHAR buff[512];
-			StatusBar (_T("Couldn't find %s! Check your config."), q2Exe);
-			StringCbPrintf (buff, sizeof(buff), _T("Error: Couldn't find a ") GAME_NAME _T(" executable:\r\n\r\n\t%s: File Not Found"), q2buff);
+			StatusBar (_T("Couldn't find %s! Check your config."), dkExe);
+			StringCbPrintf (buff, sizeof(buff), _T("Error: Couldn't find a ") GAME_NAME _T(" executable:\r\n\r\n\t%s: File Not Found"), dkbuff);
 			MessageBox (hwndMain, buff, _T("Couldn't find ") GAME_NAME, MB_OK | MB_ICONEXCLAMATION);
 			return;
 		}
 
-#ifdef LAUNCH_FROM_CONFIG
-		SetCurrentDirectory (myQ2Path);
-		StringCbPrintf (cmdLine, sizeof(cmdLine), GAME_CMDLINE, myQ2Path, q2Exe, Server);
-		CreateProcess (NULL, cmdLine, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, myQ2Path, &s, &p);
-#else
-		myQ2Path[0] = _T('\0');
-		StringCbPrintf (cmdLine, sizeof(cmdLine), GAME_CMDLINE, q2Exe, Server);
-		CreateProcess (NULL, cmdLine, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &s, &p);
-#endif
+		if (dkLaunchFromPath)
+		{
+			SetCurrentDirectory (myDKPath);
+			StringCbPrintf (cmdLine, sizeof(cmdLine), _T("\"%s\\%s\" +connect \"%s\""), myDKPath, dkExe, Server);
+			CreateProcess (NULL, cmdLine, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, myDKPath, &s, &p);
+		}
+		else
+		{
+			myDKPath[0] = _T('\0');
+			StringCbPrintf (cmdLine, sizeof(cmdLine), _T("\"%s\" +connect \"%s\""), dkExe, Server);
+			CreateProcess (NULL, cmdLine, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &s, &p);
+		}
+
 		CloseHandle (p.hProcess);
 		CloseHandle (p.hThread);
 
@@ -1260,7 +1269,7 @@ void RequestHandler (void)
 
 			if (needSleep)
 			{
-				ret = WaitForMultipleObjects (2, handleArray, FALSE, ((int)(1000.0f / (float)q2PacketsPerSecond)));
+				ret = WaitForMultipleObjects (2, handleArray, FALSE, ((int)(1000.0f / (float)packetsPerSecond)));
 				if (ret == (1 - WAIT_OBJECT_0))
 					goto abortLoop;
 			}
@@ -1768,12 +1777,12 @@ VOID ParseBuddyList (VOID)
 
 	numBuddies = 0;
 
-	if (!q2Buddies[0])
+	if (!dkBuddies[0])
 		return;
 
 	x = 0;
 
-	p = q2Buddies;
+	p = dkBuddies;
 	while ((p = _tcschr (p, '\n')))
 	{
 		x++;
@@ -1787,9 +1796,9 @@ VOID ParseBuddyList (VOID)
 
 	buddyList = HeapAlloc (GetProcessHeap(), HEAP_ZERO_MEMORY, x * sizeof(buddy));
 
-	len = (_tcslen (q2Buddies) * sizeof(_TCHAR)) + sizeof(_TCHAR);
+	len = (_tcslen (dkBuddies) * sizeof(_TCHAR)) + sizeof(_TCHAR);
 	buddies = HeapAlloc (GetProcessHeap(), 0, len);
-	StringCbCopy (buddies, len, q2Buddies);
+	StringCbCopy (buddies, len, dkBuddies);
 
 	p = buddies;
 	x = 0;
@@ -1892,16 +1901,16 @@ VOID InitMainDialog (HWND hWnd)
 		WINDOWPLACEMENT	winPlacement;
 
 		size = sizeof(DWORD);
-		RegQueryValueEx(hk, _T("Packets Per Second"), 0, NULL, (LPBYTE)&q2PacketsPerSecond, (LPDWORD)&size);
+		RegQueryValueEx(hk, _T("Packets Per Second"), 0, NULL, (LPBYTE)&packetsPerSecond, (LPDWORD)&size);
 
 		size = sizeof(DWORD);
 		RegQueryValueEx(hk, _T("Player View Style"), 0, NULL, (LPBYTE)&listIsDetailed, (LPDWORD)&size);
 
 		size = sizeof(DWORD);
-		RegQueryValueEx(hk, _T("Good Ping Threshold"), 0, NULL, (LPBYTE)&q2GoodPing, (LPDWORD)&size);
+		RegQueryValueEx(hk, _T("Good Ping Threshold"), 0, NULL, (LPBYTE)&goodPing, (LPDWORD)&size);
 
 		size = sizeof(DWORD);
-		RegQueryValueEx(hk, _T("Medium Ping Threshold"), 0, NULL, (LPBYTE)&q2MediumPing, (LPDWORD)&size);
+		RegQueryValueEx(hk, _T("Medium Ping Threshold"), 0, NULL, (LPBYTE)&mediumPing, (LPDWORD)&size);
 
 		size = sizeof(DWORD);
 		RegQueryValueEx(hk, _T("Show Empty Servers"), 0, NULL, (LPBYTE)&show_empty, (LPDWORD)&size);
@@ -1920,11 +1929,11 @@ VOID InitMainDialog (HWND hWnd)
 		size = sizeof(DWORD);
 		RegQueryValueEx (hk, _T("Sort Order"), 0, NULL, (LPBYTE)&lastSortOrder, (LPDWORD)&size);
 
-		size = sizeof (q2Path);
-		RegQueryValueEx(hk, GAME_NAME _T(" Directory"), 0, NULL, (LPBYTE)q2Path, (LPDWORD)&size);
+		size = sizeof (dkPath);
+		RegQueryValueEx(hk, GAME_NAME _T(" Directory"), 0, NULL, (LPBYTE)dkPath, (LPDWORD)&size);
 
-		size = sizeof (q2Exe);
-		RegQueryValueEx(hk, GAME_NAME _T(" Executable"), 0, NULL, (LPBYTE)q2Exe, (LPDWORD)&size);
+		size = sizeof (dkExe);
+		RegQueryValueEx(hk, GAME_NAME _T(" Executable"), 0, NULL, (LPBYTE)dkExe, (LPDWORD)&size);
 
 		size = sizeof (winPlacement);
 		if (RegQueryValueEx (hk, _T("Window Position"), 0, NULL, (LPBYTE)&winPlacement, (LPDWORD)&size) == ERROR_SUCCESS)
@@ -1938,9 +1947,15 @@ VOID InitMainDialog (HWND hWnd)
 		if (RegQueryValueEx (hk, _T("Buddy List"), 0, NULL, NULL, (LPDWORD)&size) != ERROR_SUCCESS)
 			size = 1;
 
-		q2Buddies = HeapAlloc (GetProcessHeap(), 0, size);
-		if (RegQueryValueEx (hk, _T("Buddy List"), 0, NULL, (LPBYTE)q2Buddies, (LPDWORD)&size) != ERROR_SUCCESS)
-			q2Buddies[0] = 0;
+		dkBuddies = HeapAlloc (GetProcessHeap(), 0, size);
+		if (RegQueryValueEx (hk, _T("Buddy List"), 0, NULL, (LPBYTE)dkBuddies, (LPDWORD)&size) != ERROR_SUCCESS)
+			dkBuddies[0] = 0;
+
+		size = sizeof(DWORD);
+		if (RegQueryValueEx(hk, _T("Launch from Path"), 0, NULL, (LPBYTE)&dkLaunchFromPath, (LPDWORD)&size) != ERROR_SUCCESS)
+		{
+			dkLaunchFromPath = FALSE;
+		}
 
 		RegCloseKey(hk);
 	}
@@ -1951,50 +1966,56 @@ VOID InitMainDialog (HWND hWnd)
 		SendDlgItemMessage (hwndMain, IDC_INCLUDE_FULL, BM_SETCHECK, 1, 0);
 	}
 
-	if (!q2Buddies)
+	if (!dkBuddies)
 	{
-		q2Buddies = HeapAlloc (GetProcessHeap(), 0, sizeof(_TCHAR));
-		q2Buddies[0] = '\0';
+		dkBuddies = HeapAlloc (GetProcessHeap(), 0, sizeof(_TCHAR));
+		dkBuddies[0] = '\0';
 	}
 	else if (version == 1)
 	{
 #ifdef _UNICODE
 		char *p;
-		p = (char *)_tcsdup (q2Buddies);
+		p = (char *)_tcsdup (dkBuddies);
 		if (!p)
 		{
 			return;
 		}
-		HeapFree (GetProcessHeap(), 0, q2Buddies);
-		q2Buddies = HeapAlloc (GetProcessHeap(), 0, size * sizeof(_TCHAR));
-		MultiByteToWideChar (CP_ACP, 0, p, -1, q2Buddies, size);
+		HeapFree (GetProcessHeap(), 0, dkBuddies);
+		dkBuddies = HeapAlloc (GetProcessHeap(), 0, size * sizeof(_TCHAR));
+		MultiByteToWideChar (CP_ACP, 0, p, -1, dkBuddies, size);
 		free (p);
 #endif
 	}
 
 	ParseBuddyList ();
 
-	if (!q2Path[0])
+	if (!dkPath[0])
 	{
 		if (!(RegOpenKeyEx(HKEY_LOCAL_MACHINE, GAME_REGPATH, 0, KEY_READ, &hk)))
 		{
-			size = sizeof (q2Path);
-			RegQueryValueEx(hk, GAME_REGKEY, 0, NULL, (LPBYTE)q2Path, (LPDWORD)&size);
+			size = sizeof (dkPath);
+			RegQueryValueEx(hk, GAME_REGKEY, 0, NULL, (LPBYTE)dkPath, (LPDWORD)&size);
+			RegCloseKey (hk);
+		}
+		else if (!(RegOpenKeyEx(HKEY_LOCAL_MACHINE, GAME_REGPATH, 0, KEY_READ|KEY_WOW64_32KEY, &hk)))
+		{
+			size = sizeof (dkPath);
+			RegQueryValueEx(hk, GAME_REGKEY, 0, NULL, (LPBYTE)dkPath, (LPDWORD)&size);
 			RegCloseKey (hk);
 		}
 	}
 
-	if (!q2Exe[0])
-		StringCbCopy (q2Exe, sizeof(q2Exe), DEFAULT_EXECUTABLE_NAME);
+	if (!dkExe[0])
+		StringCbCopy (dkExe, sizeof(dkExe), DEFAULT_EXECUTABLE_NAME);
 
-	if (!q2PacketsPerSecond)
-		q2PacketsPerSecond = 10;
+	if (!packetsPerSecond)
+		packetsPerSecond = 10;
 
-	if (!q2GoodPing)
-		q2GoodPing = 100;
+	if (!goodPing)
+		goodPing = 100;
 
-	if (!q2MediumPing)
-		q2MediumPing = 200;
+	if (!mediumPing)
+		mediumPing = 200;
 
 	if (listIsDetailed && g_isXP)
 		SendMessage (hWndPlayerList, LVM_SETVIEW, LV_VIEW_DETAILS, 0);
@@ -2301,9 +2322,9 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 						ListView_GetSubItemRect (hWndList, iRow, lvcd->iSubItem, LVIR_ICON, &rc);
 						list = ListView_GetImageList (hWndList, LVSIL_SMALL);
 
-						if (server->ping <= q2GoodPing)
+						if (server->ping <= goodPing)
 							iImage = 1;
-						else if (server->ping <= q2MediumPing)
+						else if (server->ping <= mediumPing)
 							iImage = 2;
 						else
 							iImage = 3;
@@ -2434,9 +2455,9 @@ LRESULT CustomDrawHandler (HWND hWnd, WPARAM wParam, LPARAM lParam)
 						RECT		rc, rc2;
 						int			iImage;
 
-						if (server->ping <= q2GoodPing)
+						if (server->ping <= goodPing)
 							iImage = 1;
-						else if (server->ping <= q2MediumPing)
+						else if (server->ping <= mediumPing)
 							iImage = 2;
 						else
 							iImage = 3;
@@ -2520,9 +2541,9 @@ VOID FillServerListView (NMLVDISPINFO *info)
 		{
 #if 1
 			info->item.mask |= LVIF_IMAGE;
-			if (server->ping <= q2GoodPing)
+			if (server->ping <= goodPing)
 				info->item.iImage = 1;
-			else if (server->ping <= q2MediumPing)
+			else if (server->ping <= mediumPing)
 				info->item.iImage = 2;
 			else
 				info->item.iImage = 3;
@@ -2828,26 +2849,26 @@ void GetResultsFromProxyDialog (HWND hDlg)
 {
 	SIZE_T	size;
 
-	memset (q2Path, 0, sizeof(q2Path));
-	memset (q2Exe, 0, sizeof(q2Exe));
+	memset (dkPath, 0, sizeof(dkPath));
+	memset (dkExe, 0, sizeof(dkExe));
 
-	SendDlgItemMessage (hDlg, IDC_Q2PATH, WM_GETTEXT, tsizeof(q2Path) - 1, (LPARAM)q2Path);
-	SendDlgItemMessage (hDlg, IDC_Q2EXE, WM_GETTEXT, tsizeof(q2Exe) - 1, (LPARAM)q2Exe);
+	SendDlgItemMessage (hDlg, IDC_DKPATH, WM_GETTEXT, tsizeof(dkPath) - 1, (LPARAM)dkPath);
+	SendDlgItemMessage (hDlg, IDC_DKEXE, WM_GETTEXT, tsizeof(dkExe) - 1, (LPARAM)dkExe);
 
-	q2PacketsPerSecond = GetDlgItemInt (hDlg, IDC_PPS, NULL, TRUE);
+	packetsPerSecond = GetDlgItemInt (hDlg, IDC_PPS, NULL, TRUE);
 
-	q2GoodPing = GetDlgItemInt (hDlg, IDC_GOODPING, NULL, TRUE);
-	q2MediumPing = GetDlgItemInt (hDlg, IDC_OKPING, NULL, TRUE);
+	goodPing = GetDlgItemInt (hDlg, IDC_GOODPING, NULL, TRUE);
+	mediumPing = GetDlgItemInt (hDlg, IDC_OKPING, NULL, TRUE);
 
 	size = SendDlgItemMessage (hDlg, IDC_BUDDIES, WM_GETTEXTLENGTH, 0, 0);
 
-	if (q2Buddies)
-		HeapFree (GetProcessHeap(), 0, q2Buddies);
+	if (dkBuddies)
+		HeapFree (GetProcessHeap(), 0, dkBuddies);
 
-	q2Buddies = HeapAlloc (GetProcessHeap(), 0, (size + 1) * sizeof(_TCHAR));
+	dkBuddies = HeapAlloc (GetProcessHeap(), 0, (size + 1) * sizeof(_TCHAR));
 
-	SendDlgItemMessage (hDlg, IDC_BUDDIES, WM_GETTEXT, size + 1, (LPARAM)q2Buddies);
-	q2Buddies[size] = 0;
+	SendDlgItemMessage (hDlg, IDC_BUDDIES, WM_GETTEXT, size + 1, (LPARAM)dkBuddies);
+	dkBuddies[size] = 0;
 
 	ParseBuddyList ();
 
@@ -2858,11 +2879,11 @@ void GetResultsFromProxyDialog (HWND hDlg)
 	UpdateWindow (hWndPlayerList);
 
 #ifdef _UNICODE
-	if (q2Path[0] && (q2Path[(sizeof(q2Path) / sizeof(*q2Path)) - 1] != '\\'))
+	if (dkPath[0] && (dkPath[(sizeof(dkPath) / sizeof(*dkPath)) - 1] != '\\'))
 #else
-	if (q2Path[0] && (q2Path[_tcslen(q2Path) - 1] != '\\'))
+	if (dkPath[0] && (dkPath[_tcslen(dkPath) - 1] != '\\'))
 #endif
-		StringCbCat (q2Path, sizeof(q2Path), _T("\\"));
+		StringCbCat (dkPath, sizeof(dkPath), _T("\\"));
 }
 
 static void SetServerInfoColumns (HWND hDlg)
@@ -2894,8 +2915,8 @@ static void SetServerInfoColumns (HWND hDlg)
 	columnTitle[0] = _T("Key");
 	columnTitle[1] = _T("Value");
 
-	width[0] = 25;
-	width[1] = 50;
+	width[0] = 30;
+	width[1] = 70;
 
 	iWidth -= 16;
 
@@ -2994,12 +3015,12 @@ LRESULT CALLBACK Proxy(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 		case WM_INITDIALOG:
-			SetDlgItemText (hDlg, IDC_Q2PATH, q2Path);
-			SetDlgItemText (hDlg, IDC_Q2EXE, q2Exe);
-			SetDlgItemInt (hDlg, IDC_PPS, q2PacketsPerSecond, TRUE);
-			SetDlgItemInt (hDlg, IDC_GOODPING, q2GoodPing, TRUE);
-			SetDlgItemInt (hDlg, IDC_OKPING, q2MediumPing, TRUE);
-			SetDlgItemText (hDlg, IDC_BUDDIES, q2Buddies);
+			SetDlgItemText (hDlg, IDC_DKPATH, dkPath);
+			SetDlgItemText (hDlg, IDC_DKEXE, dkExe);
+			SetDlgItemInt (hDlg, IDC_PPS, packetsPerSecond, TRUE);
+			SetDlgItemInt (hDlg, IDC_GOODPING, goodPing, TRUE);
+			SetDlgItemInt (hDlg, IDC_OKPING, mediumPing, TRUE);
+			SetDlgItemText (hDlg, IDC_BUDDIES, dkBuddies);
 			return TRUE;
 
 		case WM_CLOSE:
@@ -3045,7 +3066,7 @@ int PASCAL WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		return 1;
 
 	hIcon = (HICON)LoadImage(hThisInstance,
-		MAKEINTRESOURCE(IDI_Q2),
+		MAKEINTRESOURCE(IDI_DK),
 		IMAGE_ICON,
 		GetSystemMetrics(SM_CXSMICON),
 		GetSystemMetrics(SM_CYSMICON),

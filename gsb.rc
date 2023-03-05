@@ -106,7 +106,7 @@ IDI_FREEBSD             ICON                    "freebsd.ico"
 
 IDI_MACOSX              ICON                    "macos.ico"
 
-IDI_Q2                  ICON                    "quake2.ico"
+IDI_DK                  ICON                    "daikatana.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -160,8 +160,8 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "Config"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    EDITTEXT        IDC_Q2PATH,7,17,183,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_Q2EXE,7,45,183,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_DKPATH,7,17,183,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_DKEXE,7,45,183,14,ES_AUTOHSCROLL
     LTEXT           "Game Path",IDC_STATIC,7,7,102,8
     LTEXT           "Game Executable",IDC_STATIC,7,35,102,9
     LTEXT           "Buddy List (one per line)",IDC_STATIC,7,64,78,8

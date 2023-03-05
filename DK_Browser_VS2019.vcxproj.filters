@@ -73,9 +73,6 @@
     <None Include="macos.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="quake2.ico">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="windows.ico">
       <Filter>Resource Files</Filter>
     </None>
@@ -94,5 +91,10 @@
     <Manifest Include="DK_Browser.exe.manifest">
       <Filter>Source Files</Filter>
     </Manifest>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="daikatana.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

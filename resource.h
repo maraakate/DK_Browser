@@ -10,7 +10,7 @@
 #define IDC_OKPING                      109
 #define IDC_ABOUT                       110
 #define IDR_MAINFRAME                   128
-#define IDI_Q2                          132
+#define IDI_DK                          132
 #define IDI_ICON1                       134
 #define IDI_ICON2                       135
 #define IDI_SERVER                      135
@@ -35,8 +35,8 @@
 #define IDC_CANCEL                      1003
 #define IDC_STATUSMSG                   1004
 #define IDC_ALT                         1013
-#define IDC_Q2PATH                      1014
-#define IDC_Q2EXE                       1015
+#define IDC_DKPATH                      1014
+#define IDC_DKEXE                       1015
 #define IDC_SERVERLIST                  1017
 #define IDC_PLAYERS                     1018
 #define IDC_EXIT                        1019

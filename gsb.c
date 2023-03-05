@@ -143,7 +143,6 @@ static void SetHighDPIMode (void)
 	if (shcoreDLL)
 		SetProcessDpiAwareness = (HRESULT(WINAPI *)(DKB_PROCESS_DPI_AWARENESS))GetProcAddress(shcoreDLL, "SetProcessDpiAwareness");
 
-
 	if (SetProcessDpiAwareness)
 		SetProcessDpiAwareness(DKB_PROCESS_PER_MONITOR_DPI_AWARE);
 	else if (SetProcessDPIAware)
@@ -502,6 +501,11 @@ BOOL InitListViewImageLists(HWND hWndListView)
 	return TRUE;
 }
 
+static inline UINT8 getByte (UINT32 x, int n)
+{
+	return (x >> (n << 3)) & 0xff;
+}
+
 int CALLBACK CompareFunc (LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
 	int				index;
@@ -524,7 +528,37 @@ int CALLBACK CompareFunc (LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	a = &servers[lParam1];
 	b = &servers[lParam2];
 
-	if (column->sortType == SORT_DEFAULT)
+	if (column->fofs == 0) /* FS: Need to handle IP:PORT differently. */
+	{
+		struct in_addr tmp;
+		_TCHAR serverIP_a[64];
+		_TCHAR serverIP_b[64];
+		int retval;
+		UINT8 a, b, c, d;
+
+		/* FS: Extract each octect individually so we can pad it out for strcmp. */
+
+		tmp.S_un.S_addr = servers[lParam1].ip;
+		a = getByte(tmp.S_un.S_addr, 0);
+		b = getByte(tmp.S_un.S_addr, 1);
+		c = getByte(tmp.S_un.S_addr, 2);
+		d = getByte(tmp.S_un.S_addr, 3);
+
+		//StringCbPrintf (serverIP_a, sizeof(serverIP_a), _T("%S:%d"), inet_ntoa(tmp), servers[lParam1].port);
+		StringCbPrintf (serverIP_a, sizeof(serverIP_a), _T("%03d.%03d.%03d.%03d:%05d"), a, b, c, d, servers[lParam1].port);
+
+		tmp.S_un.S_addr = servers[lParam2].ip;
+		a = getByte(tmp.S_un.S_addr, 0);
+		b = getByte(tmp.S_un.S_addr, 1);
+		c = getByte(tmp.S_un.S_addr, 2);
+		d = getByte(tmp.S_un.S_addr, 3);
+		//StringCbPrintf (serverIP_b, sizeof(serverIP_b), _T("%S:%d"), inet_ntoa(tmp), servers[lParam2].port);
+		StringCbPrintf (serverIP_b, sizeof(serverIP_b), _T("%03d.%03d.%03d.%03d:%05d"), a, b, c, d, servers[lParam2].port);
+
+		retval = _tcsicmp (serverIP_a, serverIP_b) * inverted * column->defaultSort;
+		return retval;
+	}
+	else if (column->sortType == SORT_DEFAULT)
 	{
 		return _tcsicmp ((_TCHAR *)((BYTE *)a + column->fofs), (_TCHAR *)((BYTE *)b + column->fofs)) * inverted * column->defaultSort;
 	}
@@ -2060,7 +2094,7 @@ VOID ShowServerContextMenu (LPNMITEMACTIVATE ev)
 	}
 	else if (i == 3)
 	{
-		DWORD	index;
+		//DWORD	index;
 		LVITEM	pitem;
 
 		memset (&pitem, 0, sizeof(pitem));
@@ -2697,6 +2731,14 @@ LRESULT CALLBACK WndProcMain(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 			// Parse the menu selections:
 			switch (wParam)
 			{
+				case IDC_SERVERINFO:
+					switch (((LPNMHDR)lParam)->code)
+					{
+						case LVN_COLUMNCLICK:
+							SortServerListView ((NMLVDISPINFO *)lParam);
+							break;
+					}
+					break;
 				case IDC_SERVERLIST:
 					switch (((LPNMHDR)lParam)->code)
 					{
@@ -2825,7 +2867,7 @@ void GetResultsFromProxyDialog (HWND hDlg)
 
 static void SetServerInfoColumns (HWND hDlg)
 {
-	HICON		icon;
+	//HICON		icon;
 	HWND		hWndList;      // handle to the list view window
 	RECT		rcl;           // rectangle for setting the size of the window
 	int			index;          // index used in FOR loops
@@ -2835,7 +2877,7 @@ static void SetServerInfoColumns (HWND hDlg)
 	_TCHAR *columnTitle[2] = { 0 };
 	int i = 0;
 	LV_ITEM lvI;
-	const TCHAR *seps = "\\";
+	const TCHAR *seps = _T("\\");
 	TCHAR *token;
 	TCHAR *next_token = NULL;
 	TCHAR *rLine = servers[currentServerInfoIndex].infostrings;

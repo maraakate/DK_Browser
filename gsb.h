@@ -112,7 +112,7 @@ const infokey_t	infokey[] =
 const column_t	columns[] =
 {
 	{_T("Host Name"), 30, INFO_HOSTNAME, FOFS(szHostName), CSORT_DEFAULT, 1},
-	{_T("IP Address"), 20, INFO_IPADDRESS, FOFS(ip), CSORT_NUMERIC, 0},
+	{_T("IP Address"), 20, INFO_IPADDRESS, FOFS(ip), CSORT_DEFAULT, 1},
 	{_T("Map"), 10, INFO_MAP_NAME, FOFS (szMapName), CSORT_DEFAULT, 1},
 	{_T("Players"), 10, INFO_PLAYERS, FOFS(curClients), CSORT_NUMERIC, -1},
 	{_T("Game Mode"), 10, INFO_GAMEMODE, FOFS(szGameMode), CSORT_DEFAULT, 1},

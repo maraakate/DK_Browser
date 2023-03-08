@@ -22,6 +22,7 @@
 */
 
 #include "dksb.h"
+#include <ShlObj.h>
 
 #define tsizeof(x) (sizeof((x))/sizeof((x)[0]))
 
@@ -60,8 +61,10 @@ do { \
 HMENU		hTrayMenu;	// tray icon menu
 PNOTIFYICONDATA	notifyIconData;	// data for tray icon
 
+BROWSEINFO binf = { 0 };
+
 _TCHAR		dkPath[MAX_PATH];
-_TCHAR		dkExe[MAX_PATH];
+const _TCHAR		dkExe[] = _T("daikatana.exe");
 _TCHAR *dkBuddies;
 int			packetsPerSecond;
 
@@ -119,6 +122,26 @@ static int currentServerInfoIndex = 0; /* FS: FIXME: Crap hack because I don't k
 //#define nParts 4
 void RequestHandler (void);
 
+static int CALLBACK BrowsePathCallback(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
+{
+	if (uMsg == BFFM_INITIALIZED)
+	{
+		LPCTSTR path = (LPCTSTR)lpData;
+		SendMessage(hwnd, BFFM_SETSELECTION, TRUE, (LPARAM)path);
+	}
+
+	return 0;
+}
+
+static inline void SetDKPath (void)
+{
+#ifdef _UNICODE
+	if (dkPath[0] && (dkPath[wcslen(dkPath) - 1] != _T('\\')))
+#else
+	if (dkPath[0] && (dkPath[_tcslen(dkPath) - 1] != '\\'))
+#endif
+		StringCbCat (dkPath, sizeof(dkPath), _T("\\"));
+}
 
 typedef enum DKB_PROCESS_DPI_AWARENESS
 {
@@ -262,7 +285,6 @@ void SaveStuff(void)
 	if (!(RegOpenKeyEx (HKEY_CURRENT_USER, _T("SOFTWARE\\r1ch.net\\") APP_NAME, 0, KEY_WRITE, &hk)))
 	{
 		RegSetValueEx (hk, GAME_NAME _T(" Directory"), 0, REG_SZ, (const BYTE *)dkPath, (_tcslen(dkPath) + 1) * sizeof(_TCHAR));
-		RegSetValueEx (hk, GAME_NAME _T(" Executable"), 0, REG_SZ, (const BYTE *)dkExe, (_tcslen(dkExe) + 1) * sizeof(_TCHAR));
 
 		if (dkBuddies[0])
 			RegSetValueEx (hk, _T("Buddy List"), 0, REG_SZ, (const BYTE *)dkBuddies, (_tcslen(dkBuddies) + 1) * sizeof(_TCHAR));
@@ -1932,9 +1954,6 @@ VOID InitMainDialog (HWND hWnd)
 		size = sizeof (dkPath);
 		RegQueryValueEx(hk, GAME_NAME _T(" Directory"), 0, NULL, (LPBYTE)dkPath, (LPDWORD)&size);
 
-		size = sizeof (dkExe);
-		RegQueryValueEx(hk, GAME_NAME _T(" Executable"), 0, NULL, (LPBYTE)dkExe, (LPDWORD)&size);
-
 		size = sizeof (winPlacement);
 		if (RegQueryValueEx (hk, _T("Window Position"), 0, NULL, (LPBYTE)&winPlacement, (LPDWORD)&size) == ERROR_SUCCESS)
 		{
@@ -2005,8 +2024,7 @@ VOID InitMainDialog (HWND hWnd)
 		}
 	}
 
-	if (!dkExe[0])
-		StringCbCopy (dkExe, sizeof(dkExe), DEFAULT_EXECUTABLE_NAME);
+	SetDKPath();
 
 	if (!packetsPerSecond)
 		packetsPerSecond = 10;
@@ -2023,6 +2041,13 @@ VOID InitMainDialog (HWND hWnd)
 	SetWindowText (hwndMain, APP_NAME);
 
 	WndInitNotifyIconData();
+
+	binf.lParam = (LPARAM)dkPath;
+	binf.lpfn = BrowsePathCallback;
+	binf.lpszTitle = _T("Browse for Daikatana folder...");
+	binf.ulFlags = BIF_RETURNONLYFSDIRS;
+	if (g_isXP)
+		binf.ulFlags |= (BIF_USENEWUI | BIF_NONEWFOLDERBUTTON);
 
 	ShowWindow (hwndMain, SW_SHOWNORMAL);
 	UpdateWindow (hwndMain);
@@ -2850,15 +2875,15 @@ void GetResultsFromProxyDialog (HWND hDlg)
 	SIZE_T	size;
 
 	memset (dkPath, 0, sizeof(dkPath));
-	memset (dkExe, 0, sizeof(dkExe));
 
 	SendDlgItemMessage (hDlg, IDC_DKPATH, WM_GETTEXT, tsizeof(dkPath) - 1, (LPARAM)dkPath);
-	SendDlgItemMessage (hDlg, IDC_DKEXE, WM_GETTEXT, tsizeof(dkExe) - 1, (LPARAM)dkExe);
 
 	packetsPerSecond = GetDlgItemInt (hDlg, IDC_PPS, NULL, TRUE);
 
 	goodPing = GetDlgItemInt (hDlg, IDC_GOODPING, NULL, TRUE);
 	mediumPing = GetDlgItemInt (hDlg, IDC_OKPING, NULL, TRUE);
+
+	dkLaunchFromPath = IsDlgButtonChecked(hDlg, IDC_CHECK1);
 
 	size = SendDlgItemMessage (hDlg, IDC_BUDDIES, WM_GETTEXTLENGTH, 0, 0);
 
@@ -2878,12 +2903,7 @@ void GetResultsFromProxyDialog (HWND hDlg)
 	UpdateWindow (hWndList);
 	UpdateWindow (hWndPlayerList);
 
-#ifdef _UNICODE
-	if (dkPath[0] && (dkPath[(sizeof(dkPath) / sizeof(*dkPath)) - 1] != '\\'))
-#else
-	if (dkPath[0] && (dkPath[_tcslen(dkPath) - 1] != '\\'))
-#endif
-		StringCbCat (dkPath, sizeof(dkPath), _T("\\"));
+	SetDKPath();
 }
 
 static void SetServerInfoColumns (HWND hDlg)
@@ -3012,11 +3032,13 @@ LRESULT CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 // Message handler for about box.
 LRESULT CALLBACK Proxy(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	int wmId, wmEvent;
+
 	switch (message)
 	{
 		case WM_INITDIALOG:
 			SetDlgItemText (hDlg, IDC_DKPATH, dkPath);
-			SetDlgItemText (hDlg, IDC_DKEXE, dkExe);
+			CheckDlgButton (hDlg, IDC_CHECK1, dkLaunchFromPath);
 			SetDlgItemInt (hDlg, IDC_PPS, packetsPerSecond, TRUE);
 			SetDlgItemInt (hDlg, IDC_GOODPING, goodPing, TRUE);
 			SetDlgItemInt (hDlg, IDC_OKPING, mediumPing, TRUE);
@@ -3030,12 +3052,45 @@ LRESULT CALLBACK Proxy(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 			return TRUE;
 
 		case WM_COMMAND:
-			if (LOWORD(wParam) == IDOK)
-			{
-				GetResultsFromProxyDialog(hDlg);
+			wmId = LOWORD(wParam);
+			wmEvent = HIWORD(wParam);
 
-				EndDialog(hDlg, 0);
-				return TRUE;
+			// Parse the menu selections:
+			switch (wmId)
+			{
+				case IDOK:
+				{
+					GetResultsFromProxyDialog(hDlg);
+
+					EndDialog(hDlg, 0);
+					return TRUE;
+				}
+
+				case IDC_BROWSE:
+				{
+					LPITEMIDLIST pidl = SHBrowseForFolder (&binf);
+					if (pidl != 0)
+					{
+						HRESULT hr = SHGetPathFromIDList (pidl, dkPath);
+
+						if (SUCCEEDED(hr))
+						{
+							CoTaskMemFree(pidl);
+						}
+
+						SetDKPath();
+						binf.lParam = (LPARAM)dkPath;
+						SetDlgItemText(hDlg, IDC_DKPATH, dkPath);
+						return TRUE;
+					}
+
+					break;
+				}
+
+				default:
+				{
+					break;
+				}
 			}
 			break;
 	}

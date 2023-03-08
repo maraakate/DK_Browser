@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by gsb.rc
+// Used by dksb.rc
 //
 #define IDS_APP_TITLE                   103
 #define IDM_ABOUT                       104
@@ -36,7 +36,6 @@
 #define IDC_STATUSMSG                   1004
 #define IDC_ALT                         1013
 #define IDC_DKPATH                      1014
-#define IDC_DKEXE                       1015
 #define IDC_SERVERLIST                  1017
 #define IDC_PLAYERS                     1018
 #define IDC_EXIT                        1019
@@ -48,14 +47,15 @@
 #define IDC_BUDDIES                     1025
 #define IDC_PPS                         1027
 #define IDC_GOODPING                    1028
-#define IDC_INCLUDE_FULL                1028
-#define IDC_INCLUDE_EMPTY               1029
+#define IDC_INCLUDE_FULL                1029
+#define IDC_INCLUDE_EMPTY               1030
 #define IDC_MOD                         1031
 #define IDC_GAMETYPE                    1032
-#define IDC_FILTERGROUP                 1034
-#define IDC_LABELMOD                    1035
-#define IDC_LIST1                       1036
-#define IDC_SERVERINFO                  1036
+#define IDC_FILTERGROUP                 1033
+#define IDC_LABELMOD                    1034
+#define IDC_SERVERINFO                  1035
+#define IDC_CHECK1                      1036
+#define IDC_BROWSE                      1037
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -65,7 +65,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        303
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1037
+#define _APS_NEXT_CONTROL_VALUE         1038
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

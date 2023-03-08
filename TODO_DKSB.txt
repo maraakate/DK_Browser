@@ -1,9 +1,8 @@
-TODO as of 03/05/23:
+TODO as of 03/07/23:
 
 * Have better layout for players which shows score, ping, team, etc.
 * Double click player to get an expanded layout which could even show character
   and other userinfo strings.
-* Add checkbox for "Launch from Config" option.
 * Polish the about dialog box.
 * Polish serverinfo strings right-click context.
 * Server favourites highlighting and sorting.
@@ -13,5 +12,4 @@ TODO as of 03/05/23:
 * Auto-updater.
 * Fix highlighting columns.
 * Capture WM_NOTIFY for IDC_SERVERINFO for sorting.
-* Test Unicode vs ANSI changes.  ANSI likely broken in a few spots.
 * Test on Win9x

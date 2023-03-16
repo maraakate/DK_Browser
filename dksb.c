@@ -134,7 +134,7 @@ static int CALLBACK BrowsePathCallback(HWND hwnd, UINT uMsg, LPARAM lParam, LPAR
 	return 0;
 }
 
-static inline void SetDKPath (void)
+static _inline void SetDKPath (void)
 {
 #ifdef _UNICODE
 	if (dkPath[0] && (dkPath[wcslen(dkPath) - 1] != _T('\\')))

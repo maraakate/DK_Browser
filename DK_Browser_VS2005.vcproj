@@ -400,11 +400,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\freebsd.ico"
+				RelativePath=".\daikatana.ico"
 				>
 			</File>
 			<File
 				RelativePath=".\dksb.rc"
+				>
+			</File>
+			<File
+				RelativePath=".\freebsd.ico"
 				>
 			</File>
 			<File

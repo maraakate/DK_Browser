@@ -15,11 +15,13 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
+#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -99,15 +101,10 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_WIN32               ICON                    "windows.ico"
-
 IDI_LINUX               ICON                    "linux.ico"
-
 IDI_FREEBSD             ICON                    "freebsd.ico"
-
 IDI_MACOSX              ICON                    "macos.ico"
-
 IDI_DK                  ICON                    "daikatana.ico"
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -115,7 +112,7 @@ IDI_DK                  ICON                    "daikatana.ico"
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
+GUIDELINES DESIGNINFO 
 BEGIN
     IDD_MAIN, DIALOG
     BEGIN
@@ -139,7 +136,7 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // English (United States) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -147,8 +144,10 @@ END
 // Neutral (Sys. Default) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUSD)
+#ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_SYS_DEFAULT
 #pragma code_page(1252)
+#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -182,7 +181,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
+GUIDELINES DESIGNINFO 
 BEGIN
     IDD_GSB_PROXY, DIALOG
     BEGIN
@@ -199,11 +198,13 @@ END
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United Kingdom) resources
+// English (U.K.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 #pragma code_page(1252)
+#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -213,19 +214,12 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_COMP                ICON                    "computer.ico"
-
 IDI_ICON1               ICON                    "icon1.ico"
-
 IDI_SERVER              ICON                    "icon2.ico"
-
 IDI_ICON3               ICON                    "icon3.ico"
-
 IDI_ICON4               ICON                    "icon4.ico"
-
 IDI_ICON5               ICON                    "icon5.ico"
-
 IDI_ICON6               ICON                    "icon6.ico"
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -233,8 +227,8 @@ IDI_ICON6               ICON                    "icon6.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,13
- PRODUCTVERSION 1,0,0,13
+ FILEVERSION 1,0,0,14
+ PRODUCTVERSION 1,0,0,14
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -252,11 +246,11 @@ BEGIN
             VALUE "Comments", "daikatana server browser"
             VALUE "CompanyName", "maraakate.org"
             VALUE "FileDescription", "daikatana server browser"
-            VALUE "FileVersion", "1, 0, 0, 13"
+            VALUE "FileVersion", "1, 0, 0, 14"
             VALUE "InternalName", "dksb"
             VALUE "LegalCopyright", "Copyright (C) 2021 maraakate.org. Additional copyright (C) 2001-2007 r1ch.net"
             VALUE "ProductName", "daikatana server browser"
-            VALUE "ProductVersion", "1, 0, 0, 13"
+            VALUE "ProductVersion", "1, 0, 0, 14"
         END
     END
     BLOCK "VarFileInfo"
@@ -272,8 +266,7 @@ END
 //
 
 1                       RT_MANIFEST             "DK_Browser.exe.manifest"
-
-#endif    // English (United Kingdom) resources
+#endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

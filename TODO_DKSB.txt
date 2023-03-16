@@ -1,15 +1,14 @@
-TODO as of 03/07/23:
+TODO as of 03/15/23:
 
-* Have better layout for players which shows score, ping, team, etc.
-* Double click player to get an expanded layout which could even show character
-  and other userinfo strings.
+* Have better layout for players which shows character, team, spectator, etc.
+* Right click context for player to get player infosrings.
 * Polish the about dialog box.
-* Polish serverinfo strings right-click context.
+* Server infostrings right-click context.
 * Server favourites highlighting and sorting.
 * Ability to play a sound when buddy is found.
 * Add query every X seconds option to config.
 * Move config to an INI/CFG file for portability.
 * Auto-updater.
 * Fix highlighting columns.
-* Capture WM_NOTIFY for IDC_SERVERINFO for sorting.
+* Get inverted sorting with Server Info strings dialog.
 * Test on Win9x

@@ -634,6 +634,24 @@ int CALLBACK CompareFunc2 (LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	}
 }
 
+int CALLBACK CompareFuncServerInfo (LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
+	INFOSTRINGS *a, *b;
+
+	a = (INFOSTRINGS *)lParam1;
+	b = (INFOSTRINGS *)lParam2;
+
+	switch ((int)lParamSort)
+	{
+		case 0:
+			return _tcsicmp (a->key, b->key);
+		case 1:
+			return _tcsicmp (a->value, b->value);
+		default:
+			return 0;
+	}
+}
+
 int GetImageForVersion (_TCHAR *version)
 {
 	int		image;
@@ -2921,15 +2939,19 @@ static void SetServerInfoColumns (HWND hDlg)
 	const TCHAR *seps = _T("\\");
 	TCHAR *token;
 	TCHAR *next_token = NULL;
-	TCHAR *rLine = servers[currentServerInfoIndex].infostrings;
+	TCHAR rLine[MAX_INFO_STRING];
+
+	_tcscpy(rLine, servers[currentServerInfoIndex].infostrings);
 
 	hWndList = GetDlgItem (hDlg, IDC_SERVERINFO);
 	GetClientRect(hWndList, &rcl);
 	iWidth = (rcl.right - rcl.left);
 
-	SendMessage (hWndList, LVM_SETEXTENDEDLISTVIEWSTYLE, (WPARAM)0, (LPARAM)LVS_EX_SUBITEMIMAGES | LVS_EX_FULLROWSELECT);
+	SendMessage (hWndList, LVM_SETEXTENDEDLISTVIEWSTYLE, (WPARAM)0, (LPARAM)LVS_EX_SUBITEMIMAGES|LVS_EX_FULLROWSELECT);
 
-	lvC.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM | LVCF_ORDER;
+	memset(&lvC, 0, sizeof(lvC));
+
+	lvC.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
 	lvC.fmt = LVCFMT_LEFT;
 
 	columnTitle[0] = _T("Key");
@@ -2958,11 +2980,14 @@ static void SetServerInfoColumns (HWND hDlg)
 	{
 		memset(&lvI, 0, sizeof(lvI));
 
-		lvI.mask = LVIF_TEXT;
+		lvI.mask = LVIF_TEXT | LVIF_PARAM;
+
+		StringCchCopy (servers[currentServerInfoIndex].infoKvP[i].key, tsizeof(servers[currentServerInfoIndex].infoKvP[i].key), token);
 
 		lvI.iItem = i;
 		lvI.iSubItem = 0;
-		lvI.pszText = token;
+		lvI.pszText = servers[currentServerInfoIndex].infoKvP[i].key;
+		lvI.lParam = (LPARAM)&servers[currentServerInfoIndex].infoKvP[i];
 
 		ListView_InsertItem(hWndList, &lvI);
 
@@ -2974,9 +2999,14 @@ static void SetServerInfoColumns (HWND hDlg)
 		if (!token)
 			break;
 
+		StringCchCopy (servers[currentServerInfoIndex].infoKvP[i].value, tsizeof(servers[currentServerInfoIndex].infoKvP[i].value), token);
+
+		lvI.mask = LVIF_TEXT;
+
 		lvI.iItem = i;
 		lvI.iSubItem = 1;
-		lvI.pszText = token;
+		lvI.pszText = servers[currentServerInfoIndex].infoKvP[i].value;
+
 		ListView_SetItem(hWndList, &lvI);
 		i++;
 
@@ -2986,6 +3016,21 @@ static void SetServerInfoColumns (HWND hDlg)
 		token = strtok_s(NULL, seps, &next_token);
 #endif
 	}
+
+	SendMessage (hWndList, LVM_SORTITEMS, (WPARAM)0, (LPARAM)CompareFuncServerInfo);
+}
+
+static void SortServerInfoView (NMLVDISPINFO *info)
+{
+	int	i;
+
+	i = info->item.iItem;
+
+	//if (i == lastSortOrder)
+	//	i |= 0x4000;
+
+	SendMessage (info->hdr.hwndFrom, LVM_SORTITEMS, (WPARAM)i, (LPARAM)CompareFuncServerInfo);
+	//lastSortOrder = i;
 }
 
 LRESULT CALLBACK ServerInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -2998,6 +3043,19 @@ LRESULT CALLBACK ServerInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 		case WM_CLOSE:
 			EndDialog(hDlg, 0);
 			return TRUE;
+		case WM_NOTIFY:
+			// Parse the menu selections:
+			switch (wParam)
+			{
+				case IDC_SERVERINFO:
+					switch (((LPNMHDR)lParam)->code)
+					{
+						case LVN_COLUMNCLICK:
+							SortServerInfoView ((NMLVDISPINFO *)lParam);
+							break;
+					}
+			}
+			break;
 		case WM_COMMAND:
 			if (LOWORD(wParam) == IDOK)
 			{

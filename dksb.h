@@ -26,9 +26,20 @@
 
 #pragma warning (disable : 4996)
 
+#define MAX_INFO_STRING	4096
+#define MAX_INFO_KV_LEN	64
+#define MAX_NETNAMELENGTH	16
+#define MAX_CLIENTS	64
+
+typedef struct _INFOSTRINGS
+{
+	_TCHAR key[MAX_INFO_KV_LEN];
+	_TCHAR value[MAX_INFO_KV_LEN];
+} INFOSTRINGS;
+
 typedef struct _PLAYERINFO
 {
-	_TCHAR	playername[32];
+	_TCHAR	playername[MAX_NETNAMELENGTH];
 	int		ping;
 	int		score;
 } PLAYERINFO;
@@ -37,22 +48,23 @@ typedef struct _SERVERINFO
 {
 	unsigned int	ip;
 	unsigned short	port;
-	_TCHAR		szHostName[256];
-	_TCHAR		szMapName[256];
-	_TCHAR		szVersion[256];
-	_TCHAR		szGameDate[64];
-	_TCHAR		szGameName[64];
+	_TCHAR		szHostName[MAX_INFO_KV_LEN];
+	_TCHAR		szMapName[MAX_INFO_KV_LEN];
+	_TCHAR		szVersion[MAX_INFO_KV_LEN];
+	_TCHAR		szGameDate[MAX_INFO_KV_LEN];
+	_TCHAR		szGameName[MAX_INFO_KV_LEN];
 	int			curClients;
 	int			maxClients;
 	DWORD		startPing;
 	DWORD		ping;
-	PLAYERINFO	players[64];
+	PLAYERINFO	players[MAX_CLIENTS];
 	BOOL		gotResponse;
 	int			attempts;
-	_TCHAR		szGameMode[64];
+	_TCHAR		szGameMode[MAX_INFO_KV_LEN];
 	int			timelimit;
 	int			reservedSlots;
-	_TCHAR		infostrings[1536];
+	_TCHAR		infostrings[MAX_INFO_STRING];
+	INFOSTRINGS	infoKvP[MAX_INFO_STRING];
 } SERVERINFO;
 
 enum

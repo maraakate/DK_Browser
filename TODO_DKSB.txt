@@ -9,5 +9,4 @@ TODO as of 03/16/23:
 * Move config to an INI/CFG file for portability.
 * Auto-updater.
 * Fix highlighting columns.
-* Get inverted sorting with Server Info strings dialog.
 * Test on Win9x

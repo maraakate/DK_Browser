@@ -117,6 +117,7 @@ int numServers = 0;
 
 static int lastSortOrder;
 
+static int lastServerInfoSortOrder = 0; /* FS: FIXME: Crap hack. */
 static int currentServerInfoIndex = 0; /* FS: FIXME: Crap hack because I don't know GUI code. */
 
 //#define nParts 4
@@ -637,16 +638,26 @@ int CALLBACK CompareFunc2 (LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 int CALLBACK CompareFuncServerInfo (LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
 	INFOSTRINGS *a, *b;
+	int inverted, index;
 
 	a = (INFOSTRINGS *)lParam1;
 	b = (INFOSTRINGS *)lParam2;
 
-	switch ((int)lParamSort)
+	index = (int)lParamSort;
+	if (index & 0x4000)
+	{
+		index &= ~0x4000;
+		inverted = -1;
+	}
+	else
+		inverted = 1;
+
+	switch (index)
 	{
 		case 0:
-			return _tcsicmp (a->key, b->key);
+			return _tcsicmp (a->key, b->key) * inverted;
 		case 1:
-			return _tcsicmp (a->value, b->value);
+			return _tcsicmp (a->value, b->value) * inverted;
 		default:
 			return 0;
 	}
@@ -3011,6 +3022,8 @@ static void SetServerInfoColumns (HWND hDlg)
 	TCHAR *next_token = NULL;
 	TCHAR rLine[MAX_INFO_STRING];
 
+	lastServerInfoSortOrder = 0;
+
 	_tcscpy(rLine, servers[currentServerInfoIndex].infostrings);
 
 	hWndList = GetDlgItem (hDlg, IDC_SERVERINFO);
@@ -3096,11 +3109,11 @@ static void SortServerInfoView (NMLVDISPINFO *info)
 
 	i = info->item.iItem;
 
-	//if (i == lastSortOrder)
-	//	i |= 0x4000;
+	if (i == lastServerInfoSortOrder)
+		i |= 0x4000;
 
 	SendMessage (info->hdr.hwndFrom, LVM_SORTITEMS, (WPARAM)i, (LPARAM)CompareFuncServerInfo);
-	//lastSortOrder = i;
+	lastServerInfoSortOrder = i;
 }
 
 LRESULT CALLBACK ServerInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)

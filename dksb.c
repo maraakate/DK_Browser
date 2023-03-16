@@ -2158,7 +2158,6 @@ VOID ShowServerContextMenu (LPNMITEMACTIVATE ev)
 	}
 	else if (i == 3)
 	{
-		//DWORD	index;
 		LVITEM	pitem;
 
 		memset (&pitem, 0, sizeof(pitem));
@@ -2172,6 +2171,77 @@ VOID ShowServerContextMenu (LPNMITEMACTIVATE ev)
 		/* FS: FIXME: This is wrong, but it works. */
 		currentServerInfoIndex = pitem.lParam;
 		DialogBox(hThisInstance, (LPCTSTR)IDD_SERVERINFO, hwndMain, (DLGPROC)ServerInfo);
+	}
+
+abortMenu:
+
+	DestroyMenu (menu);
+}
+
+VOID ShowServerInfoContextMenu (LPNMITEMACTIVATE ev)
+{
+	HMENU			menu;
+	int				i;
+
+	if (ev->iItem == -1)
+		return;
+
+	menu = CreatePopupMenu ();
+
+	AppendMenu (menu, MF_STRING, 1, _T("Copy"));
+
+	ClientToScreen (hwndMain, &ev->ptAction);
+
+	i = TrackPopupMenuEx (menu, TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD, ev->ptAction.x, ev->ptAction.y, hwndMain, NULL);
+
+	if (i == 1)
+	{
+		LVITEM	pitem;
+		SIZE_T	cch;
+		LPTSTR  lptstrCopy;
+		HGLOBAL hglbCopy;
+		_TCHAR	str[MAX_INFO_KV_LEN*3];
+		INFOSTRINGS *infostring;
+
+		if (!OpenClipboard(hwndMain))
+			goto abortMenu;
+
+		EmptyClipboard ();
+
+		memset (&pitem, 0, sizeof(pitem));
+
+		pitem.iItem = ev->iItem;
+		pitem.iSubItem = 0;
+		pitem.mask = LVIF_PARAM;
+
+		SendMessage (ev->hdr.hwndFrom, LVM_GETITEM, 0, (LPARAM)(LPLVITEM)&pitem);
+
+		infostring = (INFOSTRINGS *)pitem.lParam;
+
+		StringCbPrintf (str, sizeof(str), _T("%s: %s"), infostring->key, infostring->value);
+
+		cch = _tcslen (str);
+
+		hglbCopy = GlobalAlloc(GMEM_MOVEABLE, (cch + 1) * sizeof(TCHAR));
+		if (hglbCopy == NULL)
+		{
+			CloseClipboard();
+			goto abortMenu;
+		}
+
+		lptstrCopy = GlobalLock(hglbCopy);
+		memcpy (lptstrCopy, str, cch * sizeof(TCHAR));
+		lptstrCopy[cch] = (TCHAR)0;
+		GlobalUnlock(hglbCopy);
+
+		// Place the handle on the clipboard.
+#ifdef _UNICODE
+		SetClipboardData (CF_UNICODETEXT, hglbCopy);
+#else
+		SetClipboardData (CF_TEXT, hglbCopy);
+#endif
+
+		CloseClipboard ();
 	}
 
 abortMenu:
@@ -2936,7 +3006,7 @@ static void SetServerInfoColumns (HWND hDlg)
 	_TCHAR *columnTitle[2] = { 0 };
 	int i = 0;
 	LV_ITEM lvI;
-	const TCHAR *seps = _T("\\");
+	const TCHAR *seps = _T("\\\n");
 	TCHAR *token;
 	TCHAR *next_token = NULL;
 	TCHAR rLine[MAX_INFO_STRING];
@@ -3052,6 +3122,9 @@ LRESULT CALLBACK ServerInfo(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 					{
 						case LVN_COLUMNCLICK:
 							SortServerInfoView ((NMLVDISPINFO *)lParam);
+							break;
+						case NM_RCLICK:
+							ShowServerInfoContextMenu ((LPNMITEMACTIVATE)lParam);
 							break;
 					}
 			}

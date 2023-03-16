@@ -1,9 +1,8 @@
-TODO as of 03/15/23:
+TODO as of 03/16/23:
 
 * Have better layout for players which shows character, team, spectator, etc.
 * Right click context for player to get player infosrings.
 * Polish the about dialog box.
-* Server infostrings right-click context.
 * Server favourites highlighting and sorting.
 * Ability to play a sound when buddy is found.
 * Add query every X seconds option to config.
